@@ -1,0 +1,14 @@
+{
+  "name": "scheduled-worker",
+  "version": "1.0.0",
+  "description": "the cron job handler library of probso",
+  "license": "ISC",
+  "author": "swaparup",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "tsc -b && nodemon dist/index.js",
+    "build": "tsc -b"
+  }
+}

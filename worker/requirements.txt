@@ -1,0 +1,17 @@
+black
+cloudinary
+google-cloud-texttospeech
+google-genai>=0.3.0
+openai==2.14.0
+manim==0.19.1
+numpy
+opencv-python
+psycopg2-binary
+Pillow
+PyMuPDF==1.23.8
+pytesseract
+python-dotenv>=1.0.0
+redis
+requests
+pdfplumber
+moviepy

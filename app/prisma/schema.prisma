@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id  String @id @default(uuid())
+  username String @unique
+  email String @unique
+  conversions Conversion[]
+}
+
+model Conversion {
+  id Int @id @default(autoincrement())
+  userId String
+  createdAt DateTime @default(now())
+  jobId String @unique
+
+  user User @relation(fields: [userId], references: [id])
+  job Job @relation(fields: [jobId], references: [id])
+}
+
+model Job {
+  id String @id
+  status String
+  pdfUrl String @map("pdf_url")
+  outputUrl String? @map("output_url")
+
+  conversion Conversion?
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model UserRole {
+  id String @id
+  role Role
+}
