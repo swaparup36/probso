@@ -40,24 +40,25 @@ model UserRole {
 
 model UserSubscription {
   id             String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  userId         String @unique @db.VarChar(255)
-  customerId     String @db.VarChar(255)
-  planId         String @db.VarChar(255)
-  status         String @db.VarChar(50)
-  subscriptionId String @db.VarChar(255)
+  userId         String @unique @db.VarChar(255) @map("user_id")
+  customerId     String @db.VarChar(255) @map("customer_id")
+  planId         String @db.VarChar(255) @map("plan_id")
+  status         String @db.VarChar(50) @map("status")
+  subscriptionId String @db.VarChar(255) @map("subscription_id")
 
   @@map("user_subscriptions")
 }
 
 model UserTokenBalance {
   id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  userId    String   @unique @db.VarChar(255)
+  userId    String   @unique @db.VarChar(255) @map("user_id")
   balance   Int
   onhold    Int      @default(0)
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("user_token_balances")
 }
+
 
 enum JobStatus {
   pending
