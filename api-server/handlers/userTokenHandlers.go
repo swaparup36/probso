@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -37,14 +38,17 @@ func GetUserTokenBalance(w http.ResponseWriter, r *http.Request) {
 
 func CreateUserTokenBalance(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	fmt.Println("Request recieved at create-user-token-balance handler")
 
 	if r.Method != http.MethodPost {
+		fmt.Println("Method not allowed")
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
+		fmt.Println("Invalid body")
 		http.Error(w, "Invalid body", http.StatusBadRequest)
 		return
 	}
@@ -53,11 +57,13 @@ func CreateUserTokenBalance(w http.ResponseWriter, r *http.Request) {
 	secret := os.Getenv("CLERK_WEBHOOK_SECRET")
 	wh, err := svix.NewWebhook(secret)
 	if err != nil {
+		fmt.Println("Webhook init failed")
 		http.Error(w, "Webhook init failed", http.StatusInternalServerError)
 		return
 	}
 
 	if err := wh.Verify(payload, r.Header); err != nil {
+		fmt.Println("Unauthorized webhook")
 		http.Error(w, "Unauthorized webhook", http.StatusUnauthorized)
 		return
 	}
@@ -71,11 +77,13 @@ func CreateUserTokenBalance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.Unmarshal(payload, &event); err != nil {
+		fmt.Println("Invalid JSON payload")
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 		return
 	}
 
 	if event.Type != "user.created" {
+		fmt.Println("Invalid event type")
 		w.WriteHeader(http.StatusOK)
 		return
 	}
@@ -88,9 +96,12 @@ func CreateUserTokenBalance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := db.Database.Create(&userTokenBalance).Error; err != nil {
+		fmt.Println("Internal server error:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	fmt.Println("User token balance created successfully for user ID:", userId)
 
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"userTokenBalance": userTokenBalance,
