@@ -37,14 +37,14 @@ jobs:
 
       - name: Deploy to API VM
         run: |
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ubuntu@${{ secrets.API_VM_IP }} << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no root@${{ secrets.API_VM_IP }} << 'EOF'
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/probso-api-server:latest
             docker stop probso-api-server || true
             docker rm probso-api-server || true
             docker run -d \
               --name probso-api-server \
               --env-file /etc/api-server/.env \
-              -p 9090:9090 \
+              -p 8080:8080 \
               --restart always \
               ${{ secrets.DOCKERHUB_USERNAME }}/probso-api-server:latest
           EOF
