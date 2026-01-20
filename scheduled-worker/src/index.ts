@@ -1,16 +1,20 @@
 import "dotenv/config";
 
-const jobName = process.argv[2];
-
-if (!jobName) {
-  console.error("❌ Job name not provided");
-  process.exit(1);
-}
-
 const jobs = {
   monthlyTokenReset: async () =>
     (await import("./jobs/monthlyTokenReset.js")).monthlyTokenReset(),
 };
+
+type JobName = keyof typeof jobs;
+
+const jobName = process.argv[2];
+
+const isValidJobName = (name: string): name is JobName => name in jobs;
+
+if (!jobName || !isValidJobName(jobName)) {
+  console.error("Job name not provided or invalid");
+  process.exit(1);
+}
 
 (async () => {
   try {
