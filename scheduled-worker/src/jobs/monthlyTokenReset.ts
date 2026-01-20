@@ -18,6 +18,9 @@ export async function monthlyTokenReset() {
       await prisma.userTokenBalance.updateMany({
         where: {
           userId: userId,
+          balance: {
+            lt: 1,
+          }
         },
         data: {
           balance: 1,
