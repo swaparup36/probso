@@ -34,7 +34,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.API_VM_IP }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to APP VM
+      - name: Deploy to API VM
         run: |
           ssh ubuntu@${{ secrets.API_VM_IP }} << 'EOF'
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/probso-api-server:latest
@@ -43,7 +43,7 @@ jobs:
             docker run -d \
               --name probso-api-server \
               --env-file /etc/api-server/.env \
-              -p 8080:8080 \
+              -p 9090:9090 \
               --restart always \
               ${{ secrets.DOCKERHUB_USERNAME }}/probso-api-server:latest
           EOF

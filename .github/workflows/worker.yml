@@ -43,7 +43,6 @@ jobs:
             docker run -d \
               --name probso-worker \
               --env-file /etc/worker/.env \
-              -p 8080:8080 \
               --restart always \
               ${{ secrets.DOCKERHUB_USERNAME }}/probso-worker:latest
           EOF
