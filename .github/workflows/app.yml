@@ -20,6 +20,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
+            --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}" \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/probso-app:latest \
             ./app
 
