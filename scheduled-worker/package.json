@@ -12,10 +12,14 @@
     "build": "tsc -b"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
     "dotenv": "^17.2.3",
-    "prisma": "^7.2.0"
+    "pg": "^8.17.1"
   },
   "devDependencies": {
-    "@types/node": "^25.0.9"
+    "@types/node": "^25.0.9",
+    "@types/pg": "^8.16.0",
+    "prisma": "^7.2.0"
   }
 }

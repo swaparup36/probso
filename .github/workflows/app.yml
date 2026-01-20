@@ -36,7 +36,7 @@ jobs:
 
       - name: Deploy to APP VM
         run: |
-          ssh root@${{ secrets.APP_VM_IP }} << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no root@${{ secrets.APP_VM_IP }} << 'EOF'
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/probso-app:latest
             docker stop probso-app || true
             docker rm probso-app || true
