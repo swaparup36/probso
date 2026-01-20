@@ -47,7 +47,7 @@ func CreateUserRole(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	secret := os.Getenv("CLERK_WEBHOOK_SECRET")
+	secret := os.Getenv("CLERK_WEBHOOK_SECRET_CREATE_USER_ROLE")
 	wh, err := svix.NewWebhook(secret)
 	if err != nil {
 		http.Error(w, "Webhook init failed", http.StatusInternalServerError)
