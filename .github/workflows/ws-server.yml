@@ -35,7 +35,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.WS_VM_IP }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to APP VM
+      - name: Deploy to WS VM
         run: |
           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no root@${{ secrets.WS_VM_IP }} << 'EOF'
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/probso-ws-server:latest

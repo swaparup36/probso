@@ -1,3 +1,5 @@
+"use client";
+
 import { auth } from "@clerk/nextjs/server";
 import Converter from "@/components/converter"
 
