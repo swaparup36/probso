@@ -10,7 +10,11 @@ from render_pipeline import process_job
 
 load_dotenv()
 
-r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), decode_responses=True)
+# r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), decode_responses=True)
+r = redis.Redis.from_url(
+    os.getenv["REDIS_URL"],
+    decode_responses=True
+)
 
 conn = psycopg2.connect(
     host=os.getenv("POSTGRES_HOST"),
