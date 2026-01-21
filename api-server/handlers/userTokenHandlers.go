@@ -54,7 +54,7 @@ func CreateUserTokenBalance(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	secret := os.Getenv("CLERK_WEBHOOK_SECRET")
+	secret := os.Getenv("CLERK_WEBHOOK_SECRET_CREATE_USER_BALANCE")
 	wh, err := svix.NewWebhook(secret)
 	if err != nil {
 		fmt.Println("Webhook init failed")
