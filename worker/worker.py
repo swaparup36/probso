@@ -12,7 +12,7 @@ load_dotenv()
 
 # r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), decode_responses=True)
 r = redis.Redis.from_url(
-    os.getenv["REDIS_URL"],
+    os.getenv("REDIS_URL"),
     decode_responses=True
 )
 
