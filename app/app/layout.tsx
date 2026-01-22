@@ -11,26 +11,26 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "PDF to Video - Transform PDFs into Educational Videos",
+  title: "Probso - Transform PDFs into Educational Videos",
   description:
     "Convert your PDF textbooks and documents into engaging video explanations. Learn faster with AI-powered video tutorials.",
   generator: "v0.app",
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
+        url: "/favicon.ico",
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/icon-dark-32x32.png",
+        url: "/favicon.ico",
         media: "(prefers-color-scheme: dark)",
       },
       {
-        url: "/icon.svg",
+        url: "/probso-logo-icon.svg",
         type: "image/svg+xml",
       },
     ],
-    apple: "/apple-icon.png",
+    apple: "/probso-logo-icon.png",
   },
 }
 

@@ -434,6 +434,7 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
       websocketRef.current = null
     }
 
+    setOutputVidUrl("")
     router.push("/")
   }
 
