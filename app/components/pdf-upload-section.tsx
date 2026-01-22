@@ -75,6 +75,7 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
   }
 
   const finalizeGeneration = (finalVideoUrl: string) => {
+    console.log("Finalizing the video generation")
     clearGenerationTimers()
     setGenerationStage("complete")
     setGenerationProgress(100)
@@ -157,8 +158,9 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
           }
 
           const payload = JSON.parse(event.data)
+          console.log("payload: ", payload);
 
-          if (payload.jobId && payload.jobId !== jobId) {
+          if (!payload.jobId || payload.jobId !== jobId) {
             return
           }
 
@@ -174,6 +176,7 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
           }
 
           if (payload.output_url) {
+            console.log("Got output_url: ", payload.output_url)
             finalizeGeneration(payload.output_url)
           }
 
@@ -387,7 +390,7 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
       ? String(error.response?.data || "Request failed").trim()
       : "Unexpected error";
       
-      console.error("Error generating video:", message)
+      console.log("Error generating video:", message)
       alert(message);
       resetUpload();
     }

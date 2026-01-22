@@ -24,7 +24,7 @@ var ctx = context.Background()
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := wsUpgrader.Upgrade(w, r, nil)
 	if err != nil {
-		http.Error(w, "Could not open websocket connection", http.StatusBadRequest)
+		log.Println("WebSocket upgrade failed:", err)
 		return
 	}
 	defer conn.Close()
