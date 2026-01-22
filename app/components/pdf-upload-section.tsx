@@ -380,12 +380,16 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
           startGenerationMock({ autoComplete: true })
         }
       } else {
-        alert("Failed to submit video generation job.")
+        alert("Failed to submit video generation job: " + (response.data?.message || "Unknown error"))
       }
     } catch (error) {
-      console.error("Error generating video:", error)
-      alert("Error generating video: " + error)
-      resetUpload()
+      const message = axios.isAxiosError(error)
+      ? String(error.response?.data || "Request failed").trim()
+      : "Unexpected error";
+      
+      console.error("Error generating video:", message)
+      alert(message);
+      resetUpload();
     }
   }
 

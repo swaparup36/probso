@@ -44,7 +44,7 @@ jobs:
             docker run -d \
               --name probso-ws-server \
               --env-file /etc/ws-server/.env \
-              -p 8080:8080 \
+              -p 9090:9090 \
               --restart always \
               ${{ secrets.DOCKERHUB_USERNAME }}/probso-ws-server:latest
           EOF

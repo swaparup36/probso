@@ -84,14 +84,13 @@ def process_job(job_id: str, r: redis.Redis):
     output_path = f"{job_dir}/final.mp4"
     command = [
         "manim",
-        "-m",                        # MEDIUM quality → 720p
-        "--fps", "30",               # 30 FPS
-        "-a",                        # render all scenes
+        "--resolution", "1280,720",   # 720p
+        "--fps", "30",                # 30 FPS
+        "-a",                         # render all scenes
         script_path,
         "--output_file", "final",
         "--media_dir", job_dir
     ]
-
     subprocess.run(command, check=True)
     
     videos_dir = f"{job_dir}/videos/generated_manim/720p30"
