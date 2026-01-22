@@ -16,16 +16,21 @@ r = redis.Redis.from_url(
     decode_responses=True
 )
 
-conn = psycopg2.connect(
-    host=os.getenv("POSTGRES_HOST"),
-    database=os.getenv("POSTGRES_DB"),
-    user=os.getenv("POSTGRES_USER"),
-    password=os.getenv("POSTGRES_PASSWORD"),
-    port=os.getenv("POSTGRES_PORT")
     
-)
+def get_db_connection():
+    return psycopg2.connect(
+        host=os.getenv("POSTGRES_HOST"),
+        database=os.getenv("POSTGRES_DB"),
+        user=os.getenv("POSTGRES_USER"),
+        password=os.getenv("POSTGRES_PASSWORD"),
+        port=os.getenv("POSTGRES_PORT"),
+        sslmode="require",
+        keepalives=1,
+        keepalives_idle=30,
+        keepalives_interval=10,
+        keepalives_count=5,
+    )
 
-cursor = conn.cursor()
 
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
@@ -41,14 +46,18 @@ while True:
         print(f'Processing task: {task_data}')
         task_data = json.loads(task_data)
         job_id = task_data['jobId']
-        
-        cursor.execute("UPDATE jobs SET status = %s WHERE id = %s ", ('in_progress', job_id))
-        conn.commit()
+        user_id = None
         
         try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            # Update the job status to in_progress
+            cursor.execute("UPDATE jobs SET status = %s WHERE id = %s ", ('in_progress', job_id))
+            conn.commit()
             # Get the pdf file url from the database
             cursor.execute("SELECT pdf_url FROM jobs WHERE id = %s", (job_id,))
             pdf_url = cursor.fetchone()[0]
+            conn.close()
             
             # Download the PDF file and save it locally to tmp/{job_id}/input.pdf
             pdf_path = f"tmp/{job_id}/input.pdf"
@@ -72,6 +81,8 @@ while True:
 
             print(f"Video uploaded to Cloudinary: {upload_result['secure_url']}")
             
+            conn = get_db_connection()
+            cursor = conn.cursor()
             # Update the database with the output video url and mark job as completed
             cursor.execute("UPDATE jobs SET status = %s, output_url = %s WHERE id = %s ", ('completed', upload_result['secure_url'], job_id))
             conn.commit()
@@ -81,6 +92,9 @@ while True:
             # Get the user id from the database
             cursor.execute("SELECT user_id FROM jobs WHERE id = %s", (job_id,))
             user_id = cursor.fetchone()[0]
+            
+            if not user_id:
+                raise Exception(f"User ID not found for job ID: {job_id}")
             
             # Create a new entry on the conversion table
             cursor.execute(
@@ -103,6 +117,7 @@ while True:
                 (user_id,)
             )
             conn.commit()
+            conn.close()
             
             
             # Publish job completion message to Redis
@@ -116,17 +131,23 @@ while True:
         except Exception as e:
             print(f"Job {job_id} failed.")
             print(f"Error: {e}")
+            
+            conn = get_db_connection()
+            cursor = conn.cursor()
             cursor.execute("UPDATE jobs SET status = %s, error_message = %s WHERE id = %s ", ('failed', f'{e}', job_id))
             conn.commit()
-            cursor.execute(
-                """
-                UPDATE user_token_balances
-                SET balance = balance + 1,
-                    onhold = onhold - 1,
-                    updated_at = NOW()
-                WHERE user_id = %s AND onhold > 0
-                """,
-                (user_id,)
-            )
-            conn.commit()
+            if user_id:
+                # Refund the token by moving one token from onhold to balance
+                cursor.execute(
+                    """
+                    UPDATE user_token_balances
+                    SET balance = balance + 1,
+                        onhold = onhold - 1,
+                        updated_at = NOW()
+                    WHERE user_id = %s AND onhold > 0
+                    """,
+                    (user_id,)
+                )
+                conn.commit()
+            conn.close()
 
