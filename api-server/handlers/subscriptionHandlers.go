@@ -93,6 +93,14 @@ func GetSubscriptionByUserId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if result.RowsAffected == 0 {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message":          "No subscription found for user",
+			"userSubscription": nil,
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message":          "user subscription fetched successfully",
 		"userSubscription": userSubscription,

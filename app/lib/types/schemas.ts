@@ -34,6 +34,11 @@ interface subscriptionDataInterface {
 	SubscriptionId: string;
 }
 
+interface getSubscriptionResponseInterface {
+    userSubscription: subscriptionDataInterface | null;
+    message: string;
+}
+
 interface SubscriptionRecord {
 	Id: string
 	UserId: string

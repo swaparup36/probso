@@ -36,6 +36,14 @@ func GetConversionHistoryByUserId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if result.RowsAffected == 0 {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message":     "No conversions found for the given user ID",
+			"conversions": []db.Conversion{},
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message":     "conversion history fetched successfully",
 		"conversions": conversions,
@@ -75,6 +83,14 @@ func GetConversionById(w http.ResponseWriter, r *http.Request) {
 
 	if jobResult.Error != nil {
 		http.Error(w, "Unable finding the job for the conversion", http.StatusUnauthorized)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "No job found for the given conversion ID",
+			"job":     nil,
+		})
 		return
 	}
 

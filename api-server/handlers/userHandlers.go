@@ -26,6 +26,14 @@ func GetUserRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if result.RowsAffected == 0 {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message":  "No user role found with the given ID",
+			"userRole": nil,
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message":  "user role fetched successfully",
 		"userRole": userRole,

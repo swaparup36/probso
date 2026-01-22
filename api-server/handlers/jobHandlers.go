@@ -264,6 +264,14 @@ func GetJobDetailsById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if result.RowsAffected == 0 {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message":    "No job found with the given ID",
+			"jobDetails": nil,
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message":    "job details fetched successfully",
 		"jobDetails": job,
@@ -294,6 +302,14 @@ func GetJobHistoryByUserId(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		http.Error(w, "Error fetching job history", http.StatusInternalServerError)
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "No jobs found for the given user ID",
+			"jobs":    []db.Job{},
+		})
 		return
 	}
 

@@ -247,7 +247,8 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
 
     try {
       const userSubscriptionStatus = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/subscription/${user.id}`);
-      const subscriptionData = userSubscriptionStatus.data as subscriptionDataInterface;
+      const subscriptionDataResponse = userSubscriptionStatus.data as getSubscriptionResponseInterface;
+      const subscriptionData = subscriptionDataResponse.userSubscription;
 
       return subscriptionData;
     } catch (error) {
@@ -281,6 +282,7 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
 
     try {
       const subscriptionData = await getUserSubscriptionData();
+      console.log("subscriptionData JSON: ", JSON.stringify(subscriptionData));
 
       let pageLimit = 5;
       if (subscriptionData) {
@@ -357,6 +359,7 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
       }
 
       console.log("jobData: ", jobData)
+      console.log("token: ", token)
 
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/create-job`, jobData, {
           headers: {

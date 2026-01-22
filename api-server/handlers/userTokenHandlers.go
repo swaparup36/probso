@@ -30,6 +30,14 @@ func GetUserTokenBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if result.RowsAffected == 0 {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message":          "No user token balance found with the given ID",
+			"userTokenBalance": nil,
+		})
+		return
+	}
+
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message":          "user token balance fetched successfully",
 		"userTokenBalance": userRole,
