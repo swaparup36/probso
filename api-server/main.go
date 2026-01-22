@@ -46,8 +46,8 @@ func main() {
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{
 			"http://localhost:3000",
-			"http://api.probso.live",
-			"https://api.probso.live",
+			"http://probso.live",
+			"https://probso.live",
 		}),
 		handlers.AllowedMethods([]string{
 			"GET", "POST", "PUT", "DELETE", "OPTIONS",
