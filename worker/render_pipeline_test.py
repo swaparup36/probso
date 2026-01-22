@@ -85,9 +85,9 @@ def process_job_test(job_id: str):
     output_path = f"{job_dir}/final.mp4"
     command = [
         "manim",
-        "-ql",                     # FAST: low quality
-        "--fps", "24",             # reduce FPS
-        "-a",                      # render all scenes
+        "-m",                        # MEDIUM quality → 720p
+        "--fps", "30",               # 30 FPS
+        "-a",                        # render all scenes
         script_path,
         "--output_file", "final",
         "--media_dir", job_dir
@@ -95,7 +95,7 @@ def process_job_test(job_id: str):
 
     subprocess.run(command, check=True)
     
-    videos_dir = f"{job_dir}/videos/generated_manim/480p24"
+    videos_dir = f"{job_dir}/videos/generated_manim/720p30"
     
     # Add audio to each video segment
     for video_file in os.listdir(videos_dir):
