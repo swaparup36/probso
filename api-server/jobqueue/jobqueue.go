@@ -1,23 +1,27 @@
 package jobqueue
 
 import (
+	"log"
 	"os"
+	"sync"
 
 	"github.com/redis/go-redis/v9"
 )
 
-var redisClient *redis.Client
-var connectionStr = os.Getenv("REDIS_URL")
+var (
+	redisClient *redis.Client
+	once        sync.Once
+)
 
 func GetRedisClient() *redis.Client {
-	if redisClient != nil {
-		return redisClient
-	}
+	once.Do(func() {
+		opt, err := redis.ParseURL(os.Getenv("REDIS_URL"))
+		if err != nil {
+			log.Fatalf("Failed to parse REDIS_URL: %v", err)
+		}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr: connectionStr,
+		redisClient = redis.NewClient(opt)
 	})
 
-	redisClient = rdb
 	return redisClient
 }
