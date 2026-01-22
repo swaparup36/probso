@@ -36,6 +36,10 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
   const generationQueueTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const generationProgressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const websocketRef = useRef<WebSocket | null>(null)
+  const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const reconnectAttemptsRef = useRef(0)
+  const maxReconnectAttempts = 10
 
   const clearUploadProgressInterval = () => {
     if (uploadProgressIntervalRef.current) {
@@ -53,6 +57,30 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
       clearInterval(generationProgressIntervalRef.current)
       generationProgressIntervalRef.current = null
     }
+  }
+
+  const clearHeartbeat = () => {
+    if (heartbeatIntervalRef.current) {
+      clearInterval(heartbeatIntervalRef.current)
+      heartbeatIntervalRef.current = null
+    }
+  }
+
+  const clearReconnectTimeout = () => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current)
+      reconnectTimeoutRef.current = null
+    }
+  }
+
+  const startHeartbeat = (ws: WebSocket) => {
+    clearHeartbeat()
+    // Send ping every 30 seconds to keep connection alive
+    heartbeatIntervalRef.current = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "ping" }))
+      }
+    }, 30000)
   }
 
   const startUploadProgressSimulation = () => {
@@ -77,12 +105,15 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
   const finalizeGeneration = (finalVideoUrl: string) => {
     console.log("Finalizing the video generation")
     clearGenerationTimers()
+    clearHeartbeat()
+    clearReconnectTimeout()
     setGenerationStage("complete")
     setGenerationProgress(100)
     setUploadState("complete")
     setVideoUrl(finalVideoUrl)
     setOutputVidUrl(finalVideoUrl)
     setJobId(null)
+    reconnectAttemptsRef.current = 0
     if (websocketRef.current) {
       websocketRef.current.close()
       websocketRef.current = null
@@ -116,6 +147,8 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
     return () => {
       clearUploadProgressInterval()
       clearGenerationTimers()
+      clearHeartbeat()
+      clearReconnectTimeout()
       if (websocketRef.current) {
         websocketRef.current.close()
         websocketRef.current = null
@@ -142,71 +175,126 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
       return
     }
 
-    try {
-      const ws = new WebSocket(websocketUrl)
-      websocketRef.current = ws
+    const connectWebSocket = () => {
+      try {
+        // Close existing connection if any
+        if (websocketRef.current) {
+          websocketRef.current.close()
+          websocketRef.current = null
+        }
 
-      ws.onopen = () => {
-        const subscriptionMessage = JSON.stringify({ type: "subscribe", jobId })
-        ws.send(subscriptionMessage)
-      }
+        clearHeartbeat()
+        clearReconnectTimeout()
 
-      ws.onmessage = (event) => {
-        try {
-          if (typeof event.data !== "string") {
-            return
-          }
+        console.log(`Connecting to WebSocket (attempt ${reconnectAttemptsRef.current + 1})...`)
+        const ws = new WebSocket(websocketUrl)
+        websocketRef.current = ws
 
-          const payload = JSON.parse(event.data)
-          console.log("payload: ", payload);
+        ws.onopen = () => {
+          console.log("WebSocket connected successfully")
+          reconnectAttemptsRef.current = 0 // Reset on successful connection
+          const subscriptionMessage = JSON.stringify({ type: "subscribe", jobId })
+          ws.send(subscriptionMessage)
+          
+          // Start heartbeat to keep connection alive
+          startHeartbeat(ws)
+        }
 
-          if (!payload.jobId || payload.jobId !== jobId) {
-            return
-          }
+        ws.onmessage = (event) => {
+          try {
+            if (typeof event.data !== "string") {
+              return
+            }
 
-          if (payload.status === "queued") {
-            setGenerationStage("queued")
-          }
+            // Try to parse as JSON, if it fails it might be a plain text message
+            let payload
+            try {
+              payload = JSON.parse(event.data)
+            } catch (parseError) {
+              console.warn("Received non-JSON message from WebSocket:", event.data)
+              return
+            }
 
-          if (payload.status === "processing") {
-            setGenerationStage("generating")
-            if (typeof payload.progress === "number") {
+            console.log("payload: ", payload);
+
+            // Ignore pong messages
+            if (payload.type === "pong") {
+              return
+            }
+
+            if (!payload.jobId || payload.jobId !== jobId) {
+              return
+            }
+
+            if (payload.status === "queued") {
+              setGenerationStage("queued")
+            }
+
+            if (payload.status === "processing") {
+              setGenerationStage("generating")
+              if (typeof payload.progress === "number") {
+                setGenerationProgress(Math.max(0, Math.min(100, payload.progress)))
+              }
+            }
+
+            if (payload.output_url) {
+              console.log("Got output_url: ", payload.output_url)
+              finalizeGeneration(payload.output_url)
+            }
+
+            if (payload.status === "failed") {
+              console.error("Video generation failed", payload)
+              alert("Video generation failed. Please try again.")
+              resetUpload()
+            }
+
+            if (payload.status === "progress" && typeof payload.progress === "number") {
+              setGenerationStage("generating")
               setGenerationProgress(Math.max(0, Math.min(100, payload.progress)))
             }
+          } catch (error) {
+            console.error("Error processing websocket message", error)
           }
-
-          if (payload.output_url) {
-            console.log("Got output_url: ", payload.output_url)
-            finalizeGeneration(payload.output_url)
-          }
-
-          if (payload.status === "failed") {
-            console.error("Video generation failed", payload)
-            alert("Video generation failed. Please try again.")
-            resetUpload()
-          }
-
-          if (payload.status === "progress" && typeof payload.progress === "number") {
-            setGenerationStage("generating")
-            setGenerationProgress(Math.max(0, Math.min(100, payload.progress)))
-          }
-        } catch (error) {
-          console.error("Invalid websocket payload", error)
         }
-      }
 
-      ws.onerror = (error) => {
-        console.error("Websocket error", error)
-      }
+        ws.onerror = (error) => {
+          console.error("Websocket error", error)
+        }
 
-      ws.onclose = () => {
-        websocketRef.current = null
+        ws.onclose = (event) => {
+          console.log("WebSocket closed", event.code, event.reason)
+          clearHeartbeat()
+          websocketRef.current = null
+
+          // Don't reconnect if job is complete or user closed it intentionally
+          if (!jobId || uploadState === "complete") {
+            return
+          }
+
+          // Attempt to reconnect with exponential backoff
+          if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+            reconnectAttemptsRef.current++
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current - 1), 30000)
+            console.log(`Reconnecting in ${delay}ms... (attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts})`)
+            
+            reconnectTimeoutRef.current = setTimeout(() => {
+              connectWebSocket()
+            }, delay)
+          } else {
+            console.error("Max reconnection attempts reached")
+            alert("Lost connection to server. Please refresh the page and check your job status.")
+          }
+        }
+      } catch (error) {
+        console.error("Failed to initialize websocket", error)
       }
-    } catch (error) {
-      console.error("Failed to initialize websocket", error)
     }
 
+    connectWebSocket()
+
     return () => {
+      clearHeartbeat()
+      clearReconnectTimeout()
       if (websocketRef.current) {
         websocketRef.current.close()
         websocketRef.current = null
@@ -336,8 +424,11 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
     setGenerationProgress(0)
     setGenerationStage("idle")
     setJobId(null)
+    reconnectAttemptsRef.current = 0
     clearUploadProgressInterval()
     clearGenerationTimers()
+    clearHeartbeat()
+    clearReconnectTimeout()
     if (websocketRef.current) {
       websocketRef.current.close()
       websocketRef.current = null
