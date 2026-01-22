@@ -1,4 +1,4 @@
-package jobqueue
+package pubsub
 
 import (
 	"log"
