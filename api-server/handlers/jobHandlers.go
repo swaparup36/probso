@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -17,10 +18,12 @@ var ctx = context.Background()
 func CreateJob(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	fmt.Println("request recieved at /create-job")
 
 	userId := r.Header.Get("User-ID")
 
 	if userId == "" {
+		fmt.Println("User-ID header is missing")
 		http.Error(w, "User-ID header is missing", http.StatusUnauthorized)
 		return
 	}
@@ -29,6 +32,7 @@ func CreateJob(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
+		fmt.Println("Invalid JSON body")
 		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
 		return
 	}
@@ -39,11 +43,13 @@ func CreateJob(w http.ResponseWriter, r *http.Request) {
 	var userTokenBalance db.UserTokenBalance
 	userTokenResult := db.Database.Where("user_id = ?", userId).First(&userTokenBalance)
 	if userTokenResult.Error != nil {
+		fmt.Println("Error fetching user token balance")
 		http.Error(w, "Error fetching user token balance", http.StatusInternalServerError)
 		return
 	}
 
 	if userTokenBalance.Balance <= 0 {
+		fmt.Println("Insufficient token balance")
 		http.Error(w, "Insufficient token balance", http.StatusPaymentRequired)
 		return
 	}
@@ -57,6 +63,7 @@ func CreateJob(w http.ResponseWriter, r *http.Request) {
 	jobCreationResult := db.Database.Create(&job)
 
 	if jobCreationResult.Error != nil {
+		fmt.Println("Error creating job:", jobCreationResult.Error)
 		http.Error(w, jobCreationResult.Error.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -72,11 +79,14 @@ func CreateJob(w http.ResponseWriter, r *http.Request) {
 	// convert taskData to JSON
 	taskDataJson, taskDataJsonErr := json.Marshal(taskData)
 	if taskDataJsonErr != nil {
-		log.Fatalf("could not marshal order: %v", taskDataJsonErr)
+		fmt.Println("Error marshalling task data:", taskDataJsonErr)
+		http.Error(w, "Error processing job json", http.StatusInternalServerError)
+		return
 	}
 
 	enqueueErr := redisClient.LPush(ctx, "task_queue", taskDataJson).Err()
 	if enqueueErr != nil {
+		fmt.Println("Failed to enqueue job:", enqueueErr)
 		db.Database.Model(&job).Update("status", "failed")
 		db.Database.Model(&job).Update("error_message", "enqueue failed")
 		http.Error(w, "Failed to enqueue job", http.StatusInternalServerError)
@@ -93,9 +103,12 @@ func CreateJob(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if balanceUpdateResult.Error != nil {
+		fmt.Println("Error updating user token balance:", balanceUpdateResult.Error)
 		http.Error(w, "Error updating user token balance", http.StatusInternalServerError)
 		return
 	}
+
+	fmt.Println("Job created successfully with ID:", job.Id)
 
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"jobId":   job.Id,
