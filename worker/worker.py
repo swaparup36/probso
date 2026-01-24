@@ -1,3 +1,4 @@
+import shutil
 import redis
 import psycopg2
 import cloudinary
@@ -119,6 +120,8 @@ while True:
             conn.commit()
             conn.close()
             
+            # Delete the job directory to save space
+            shutil.rmtree(f"tmp/{job_id}")
             
             # Publish job completion message to Redis
             job_status = {
@@ -150,4 +153,6 @@ while True:
                 )
                 conn.commit()
             conn.close()
+            # Delete the job directory to save space
+            shutil.rmtree(f"tmp/{job_id}")
 

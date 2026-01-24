@@ -50,17 +50,17 @@ def process_job(job_id: str, r: redis.Redis):
     os.makedirs(diagrams_folder, exist_ok=True)
 
     # Step 1 — Extract text
-    write_status(job_dir, "extracting_text", 0.1)
+    write_status(job_id, job_dir, "extracting_text", 0.1, r)
     text = extract_pdf_text(pdf_path)
     open(f"{job_dir}/extracted_text.txt", "w").write(text)
 
     # Step 2 — Extract diagrams
-    write_status(job_dir, "extracting_diagrams", 0.25)
+    write_status(job_id, job_dir, "extracting_diagrams", 0.25, r)
     diagrams = extract_images(pdf_path, diagrams_folder)
     open(f"{job_dir}/diagrams_list.txt", "w").write("\n".join(diagrams))
 
     # Step 3 — Generate Manim code
-    write_status(job_dir, "generating_manim_code", 0.50)
+    write_status(job_id, job_dir, "generating_manim_code", 0.50, r)
     manim_code = make_manim_script(job_id, diagrams)
     
     # Store the raw Manim code before sanitization for debugging
@@ -78,7 +78,7 @@ def process_job(job_id: str, r: redis.Redis):
         f.write(manim_code)
 
     # Step 4 — Render video via Manim
-    write_status(job_dir, "rendering_video", 0.80)
+    write_status(job_id, job_dir, "rendering_video", 0.80, r)
 
     pre_watermark_output_path = f"{job_dir}/pre_watermark_final.mp4"
     output_path = f"{job_dir}/final.mp4"

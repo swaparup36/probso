@@ -120,8 +120,9 @@ func listenToJobStatus(redisClient *redis.Client) {
 
 		// Get the jobId from the message payload
 		var statusUpdateMsg struct {
-			JobId  string `json:"jobId"`
-			Status string `json:"status"`
+			JobId    string  `json:"jobId"`
+			Status   string  `json:"status"`
+			Progress float64 `json:"progress"`
 		}
 		err := json.Unmarshal([]byte(msg.Payload), &statusUpdateMsg)
 		if err != nil {

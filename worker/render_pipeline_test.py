@@ -6,7 +6,7 @@ from llm import make_manim_script
 from codeformattor import sanitize_vgroup_with_images, rewrite_invalid_transforms
 from utils import write_status
 import redis
-from worker.watermark import add_watermark_to_video
+from watermark import add_watermark_to_video
 
 def concat_videos_ffmpeg(video_dir: str, output_path: str):
     video_files = sorted(

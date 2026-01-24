@@ -242,6 +242,11 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
               finalizeGeneration(payload.output_url)
             }
 
+            if (payload.progress) {
+              console.log("Got job progress: ", payload.progress)
+              setGenerationProgress(Math.max(0, Math.min(100, payload.progress)))
+            }
+
             if (payload.status === "failed") {
               console.error("Video generation failed", payload)
               alert("Video generation failed. Please try again.")
