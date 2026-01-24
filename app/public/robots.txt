@@ -1,0 +1,25 @@
+# robots.txt for Probso
+
+# Allow all crawlers to access the site
+User-agent: *
+Allow: /
+
+# Disallow private/user-specific pages
+Disallow: /settings
+Disallow: /checkout-success
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /forgot-password
+
+# Disallow API routes
+Disallow: /api/
+
+# Allow access to public pages
+Allow: /about
+Allow: /contact
+Allow: /pricing
+Allow: /terms
+Allow: /privacy
+
+# Sitemap location (update this URL with your actual domain)
+Sitemap: https://probso.live/sitemap.xml
