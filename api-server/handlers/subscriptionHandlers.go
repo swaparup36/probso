@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -26,6 +27,7 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 
 	sub, err := subscription.VerifyDodoSubscription(body.SubscriptionId)
 	if err != nil {
+		fmt.Println("Error verifying subscription:", err)
 		http.Error(w, "Invalid subscription", http.StatusBadRequest)
 		return
 	}

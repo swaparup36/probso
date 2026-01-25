@@ -21,7 +21,7 @@ export async function handleCheckoutSession(productId: string) {
                     quantity: 1
                 }
             ],
-            return_url: `${process.env.FRONTEND_URL}/checkout/success`,
+            return_url: `${process.env.FRONTEND_URL}/checkout-success`,
         });
 
         console.log('Redirect to:', session.checkout_url);
