@@ -2,46 +2,38 @@ package subscription
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/dodopayments/dodopayments-go"
+	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/swaparup36/pdfvid/api-server/jsonschemas"
 )
 
 func VerifyDodoSubscription(subscriptionID string) (*jsonschemas.DodoSubscription, error) {
-	url := fmt.Sprintf(
-		"https://api.dodopayments.com/v1/subscriptions/%s",
-		subscriptionID,
+	client := dodopayments.NewClient(
+		option.WithBearerToken("My Bearer Token"),
 	)
-
-	req, err := http.NewRequest("GET", url, nil)
+	subscription, err := client.Subscriptions.Get(context.TODO(), "subscription_id")
 	if err != nil {
-		return nil, err
+		panic(err.Error())
 	}
+	fmt.Printf("%+v\n", subscription.ProductID)
 
-	req.Header.Set("Authorization", "Bearer "+os.Getenv("DODO_PAYMENTS_API_KEY"))
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("invalid subscription (status %d)", resp.StatusCode)
-	}
-
-	var sub jsonschemas.DodoSubscription
-	if err := json.NewDecoder(resp.Body).Decode(&sub); err != nil {
-		return nil, err
-	}
-
-	return &sub, nil
+	return &jsonschemas.DodoSubscription{
+		ID: subscription.SubscriptionID,
+		Customer: struct {
+			ID string `json:"id"`
+		}{ID: subscription.Customer.CustomerID},
+		ProductID:        subscription.ProductID,
+		Status:           string(subscription.Status),
+		CancelledAt:      subscription.CancelledAt,
+		CurrentPeriodEnd: subscription.ExpiresAt.Unix(),
+	}, nil
 }
 
 func IsSubscriptionValid(sub *jsonschemas.DodoSubscription, expectedProductID string) bool {
@@ -53,7 +45,7 @@ func IsSubscriptionValid(sub *jsonschemas.DodoSubscription, expectedProductID st
 		return false
 	}
 
-	if sub.CancelledAt != nil {
+	if sub.CancelledAt != (time.Time{}) {
 		return false
 	}
 

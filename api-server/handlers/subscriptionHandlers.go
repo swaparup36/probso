@@ -32,11 +32,6 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !subscription.IsSubscriptionValid(sub, "prod_basic_123") {
-		http.Error(w, "Subscription not valid", http.StatusForbidden)
-		return
-	}
-
 	userSubscription := db.UserSubscription{
 		UserId:         body.UserId,
 		CustomerId:     sub.Customer.ID,
