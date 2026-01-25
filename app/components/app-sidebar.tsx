@@ -231,7 +231,7 @@ export function AppSidebar() {
             </Button>
 
             {/* Recent conversions */}
-            <div className="pt-6 h-[50svh] overflow-y-auto scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent">
+            <div className="pt-6 h-[50svh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500 scrollbar-track-transparent scrollbar-thumb-rounded-full">
               <p className="px-3 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider mb-2">
                 Recent
               </p>
