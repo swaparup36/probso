@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { ArrowLeft, Mail, MessageSquare } from "lucide-react"
+import axios from "axios"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -25,41 +26,82 @@ export default function ContactPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // TODO: Implement contact form submission
-    setTimeout(() => {
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/create-support-message`, {
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status === 200) {
+        alert("Your message has been sent successfully!")
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+        })
+      } else {
+        console.log("Error submitting support message: ", response.data);
+        alert("There was an error sending your message. Please try again later.")
+      }
       setIsSubmitting(false)
-      alert("Thank you for your message! We'll get back to you soon.")
-      setFormData({ name: "", email: "", subject: "", message: "" })
-    }, 1500)
+    } catch (error) {
+      console.log("Error submiting support message: ", error);
+      alert("There was an error sending your message. Please try again later.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20">
       {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Logo />
-          <Button variant="ghost" asChild className="bg-transparent">
-            <Link href="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+          <div className="flex justify-start">
+            <Logo />
+          </div>
+          <nav className="flex items-center gap-4">
+            <Link
+              href="/about"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-block"
+            >
+              About
             </Link>
-          </Button>
+            <Link
+              href="/pricing"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-block"
+            >
+              Pricing
+            </Link>
+            <Button variant="ghost" asChild className="bg-transparent">
+              <Link href="/">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Link>
+            </Button>
+          </nav>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-16 max-w-5xl">
-        <div className="mb-12 text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground text-balance">Get in Touch</h1>
-          <p className="text-xl text-muted-foreground">
+      <section className="container mx-auto px-4 py-20 max-w-5xl">
+        <div className="mb-16 text-center space-y-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#E5E5FE] text-balance">Get in Touch</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          <Card className="border-border/50 shadow-lg">
+          <Card className="border-border/50 shadow-xl bg-[#252435]/70">
             <CardHeader>
-              <CardTitle>Send us a message</CardTitle>
+              <CardTitle className="text-[#E5E5FE]">Send us a message</CardTitle>
               <CardDescription>Fill out the form and we'll get back to you within 24 hours</CardDescription>
             </CardHeader>
             <CardContent>
@@ -108,7 +150,7 @@ export default function ContactPage() {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                  className="w-full bg-[#7c7dda] hover:bg-[#6a70de] text-white rounded-full"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
@@ -118,33 +160,33 @@ export default function ContactPage() {
           </Card>
 
           <div className="space-y-6">
-            <Card className="border-border/50 shadow-lg">
+            <Card className="border-border/50 shadow-xl bg-[#252435]/70">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Mail className="h-5 w-5 text-primary" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#7c7dda]/10">
+                    <Mail className="h-5 w-5 text-[#9e9ee1]" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Email Us</CardTitle>
+                    <CardTitle className="text-lg text-[#E5E5FE]">Email Us</CardTitle>
                     <CardDescription>We're here to help</CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <a href="mailto:support@pdf2video.com" className="text-primary hover:underline">
-                  support@pdf2video.com
+                <a href="mailto:support@probso.live" className="text-[#7c7dda] hover:underline">
+                  support@probso.live
                 </a>
               </CardContent>
             </Card>
 
-            <Card className="border-border/50 shadow-lg">
+            <Card className="border-border/50 shadow-xl bg-[#252435]/70">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <MessageSquare className="h-5 w-5 text-primary" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#7c7dda]/10">
+                    <MessageSquare className="h-5 w-5 text-[#9e9ee1]" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Support</CardTitle>
+                    <CardTitle className="text-lg text-[#E5E5FE]">Support</CardTitle>
                     <CardDescription>Get help with your account</CardDescription>
                   </div>
                 </div>
@@ -153,15 +195,15 @@ export default function ContactPage() {
                 <p className="text-sm text-muted-foreground mb-4">
                   For technical support and account issues, please email our support team.
                 </p>
-                <Button variant="outline" asChild className="bg-transparent">
-                  <a href="mailto:support@pdf2video.com">Contact Support</a>
+                <Button variant="outline" asChild className="bg-transparent border-[#7c7dda]/30 hover:bg-[#7c7dda]/10">
+                  <a href="mailto:support@probso.live">Contact Support</a>
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="border-border/50 shadow-lg bg-gradient-to-br from-primary/5 to-accent/5">
+            <Card className="border-border/50 shadow-xl bg-[#252435]/70">
               <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground mb-2">Response Time</h3>
+                <h3 className="font-semibold text-[#E5E5FE] mb-2">Response Time</h3>
                 <p className="text-sm text-muted-foreground">
                   We typically respond to all inquiries within 24 hours during business days. For urgent issues, please
                   mark your email as high priority.
@@ -170,7 +212,68 @@ export default function ContactPage() {
             </Card>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border/50 bg-background/80 backdrop-blur-sm mt-20">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Product</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground">
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
+                    Pricing
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Legal</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground">
+                    Privacy Policy
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Support</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground">
+                    Contact
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Company</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground">
+                    About Us
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-border/50 pt-8">
+            <p className="text-center text-sm text-muted-foreground">© 2025 PDF2Video. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

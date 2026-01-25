@@ -13,6 +13,7 @@ func Migrate(db *gorm.DB) {
 		&UserRole{},
 		&UserSubscription{},
 		&UserTokenBalance{},
+		&SupportMessage{},
 	)
 
 	if err != nil {

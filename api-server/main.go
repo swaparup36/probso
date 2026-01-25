@@ -48,12 +48,14 @@ func main() {
 			"http://localhost:3000",
 			"http://probso.live",
 			"https://probso.live",
+			"http://admin.probso.live",
+			"https://admin.probso.live",
 		}),
 		handlers.AllowedMethods([]string{
 			"GET", "POST", "PUT", "DELETE", "OPTIONS",
 		}),
 		handlers.AllowedHeaders([]string{
-			"Content-Type", "Authorization",
+			"Content-Type", "Authorization", "User-ID",
 		}),
 	)
 

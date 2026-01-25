@@ -5,29 +5,45 @@ import { ArrowLeft } from "lucide-react"
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20">
+    <div className="min-h-screen bg-[#0b0b16]">
       {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Logo />
-          <Button variant="ghost" asChild className="bg-transparent">
-            <Link href="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+          <div className="flex justify-start">
+            <Logo />
+          </div>
+          <nav className="flex items-center gap-4">
+            <Link
+              href="/about"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-block"
+            >
+              About
             </Link>
-          </Button>
+            <Link
+              href="/pricing"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-block"
+            >
+              Pricing
+            </Link>
+            <Button variant="ghost" asChild className="bg-transparent">
+              <Link href="/">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Link>
+            </Button>
+          </nav>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Privacy Policy</h1>
-          <p className="text-muted-foreground">Last updated: December 22, 2025</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-[#E5E5FE] mb-4">Privacy Policy</h1>
+          <p className="text-[#B0B3F3]">Last updated: December 22, 2025</p>
         </div>
 
-        <div className="prose prose-lg max-w-none space-y-8 text-foreground">
+        <div className="prose prose-lg max-w-none space-y-8">
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">1. Information We Collect</h2>
+            <h2 className="text-2xl font-bold text-[#E5E5FE]">1. Information We Collect</h2>
             <p className="text-muted-foreground leading-relaxed">
               We collect information you provide directly to us when you create an account, upload PDFs, and use our
               Service. This includes:
@@ -41,7 +57,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">2. How We Use Your Information</h2>
+            <h2 className="text-2xl font-bold text-[#E5E5FE]">2. How We Use Your Information</h2>
             <p className="text-muted-foreground leading-relaxed">We use the information we collect to:</p>
             <ul className="list-disc ml-6 space-y-2 text-muted-foreground">
               <li>Provide, maintain, and improve our Service</li>
@@ -53,7 +69,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">3. Data Storage and Security</h2>
+            <h2 className="text-2xl font-bold text-[#E5E5FE]">3. Data Storage and Security</h2>
             <p className="text-muted-foreground leading-relaxed">
               We implement appropriate technical and organizational measures to protect your personal data against
               unauthorized access, alteration, disclosure, or destruction. Your PDF files are processed securely and are
@@ -62,7 +78,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">4. Sharing of Information</h2>
+            <h2 className="text-2xl font-bold text-[#E5E5FE]">4. Sharing of Information</h2>
             <p className="text-muted-foreground leading-relaxed">
               We do not sell, trade, or rent your personal information to third parties. We may share your information
               only in the following circumstances:
@@ -78,7 +94,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">5. Your Rights</h2>
+            <h2 className="text-2xl font-bold text-[#E5E5FE]">5. Your Rights</h2>
             <p className="text-muted-foreground leading-relaxed">You have the right to:</p>
             <ul className="list-disc ml-6 space-y-2 text-muted-foreground">
               <li>Access your personal data</li>
@@ -90,7 +106,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">6. Cookies and Tracking</h2>
+            <h2 className="text-2xl font-bold text-[#E5E5FE]">6. Cookies and Tracking</h2>
             <p className="text-muted-foreground leading-relaxed">
               We use cookies and similar tracking technologies to collect information about your browsing activities.
               You can control cookies through your browser settings, but disabling them may affect your ability to use
@@ -99,7 +115,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">7. Children's Privacy</h2>
+            <h2 className="text-2xl font-bold text-[#E5E5FE]">7. Children's Privacy</h2>
             <p className="text-muted-foreground leading-relaxed">
               Our Service is not intended for children under 13 years of age. We do not knowingly collect personal
               information from children under 13. If you are a parent or guardian and believe your child has provided us
@@ -108,7 +124,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">8. Changes to This Policy</h2>
+            <h2 className="text-2xl font-bold text-[#E5E5FE]">8. Changes to This Policy</h2>
             <p className="text-muted-foreground leading-relaxed">
               We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new
               Privacy Policy on this page and updating the "Last updated" date.
@@ -116,16 +132,77 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">9. Contact Us</h2>
+            <h2 className="text-2xl font-bold text-[#E5E5FE]">9. Contact Us</h2>
             <p className="text-muted-foreground leading-relaxed">
               If you have any questions about this Privacy Policy, please contact us at:{" "}
-              <a href="mailto:privacy@pdf2video.com" className="text-primary hover:underline">
-                privacy@pdf2video.com
+              <a href="mailto:admin@probso.live" className="text-[#7c7dda] hover:text-[#6a70de] hover:underline">
+                admin@probso.live
               </a>
             </p>
           </section>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-border/50 bg-background/80 backdrop-blur-sm mt-20">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Product</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground">
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground">
+                    Pricing
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Legal</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground">
+                    Privacy Policy
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Support</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground">
+                    Contact
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-3">Company</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground">
+                    About Us
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-border/50 pt-8">
+            <p className="text-center text-sm text-muted-foreground">© 2025 PDF2Video. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

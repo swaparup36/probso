@@ -41,5 +41,9 @@ func Router() *mux.Router {
 	router.HandleFunc("/user-token-balance/{userId}", customHandlers.GetUserTokenBalance).Methods("GET")
 	router.HandleFunc("/update-user-token-balance-on-subscription-renew", customHandlers.UpdateUserTokenBalanceOnSubscriptionRenew).Methods("POST")
 
+	// Support Message routes
+	router.HandleFunc("/create-support-message", customHandlers.CreateSupportMessage).Methods("POST")
+	router.Handle("/support-messages", middleware.ClerkAuthMiddleware(http.HandlerFunc(customHandlers.GetAllSupportMessages))).Methods("GET")
+
 	return router
 }

@@ -22,9 +22,7 @@ function CheckoutSuccessContent() {
 
   useEffect(() => {
     if (!subscriptionId || !user) {
-      console.log("SubscriptionId not found");
-      setState("failed");
-      setMessage("Missing subscription ID.");
+      console.log("Waiting for subscription ID or user...");
       return;
     }
     verifySubscription(subscriptionId);

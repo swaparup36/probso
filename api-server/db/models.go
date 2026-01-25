@@ -47,3 +47,12 @@ type UserTokenBalance struct {
 	Onhold    int       `gorm:"not null;default:0"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
+
+type SupportMessage struct {
+	Id        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	Name      string    `gorm:"type:varchar(255);not null"`
+	Email     string    `gorm:"type:varchar(255);not null"`
+	Subject   string    `gorm:"type:varchar(255);not null"`
+	Message   string    `gorm:"type:text;not null"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+}
