@@ -29,7 +29,7 @@ export default function PricingPage() {
       popular: false,
     },
     {
-      id: "pdt_0NWMcSlIp6bojBCUJbnZJ",
+      id: "pdt_0NX4LAmkycnrjvjCyjWas",
       name: "Starter Plan",
       price: "$10",
       period: "per month",
@@ -45,7 +45,7 @@ export default function PricingPage() {
       popular: true,
     },
     {
-      id: "pdt_0NWMcm5GDBUjZP1TqkLSa",
+      id: "pdt_0NX4LAMhk99P9UlUjlIA0",
       name: "Creator Plan",
       price: "$25",
       period: "per month",
