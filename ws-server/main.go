@@ -86,9 +86,29 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 			// delete from global subscribers map --> jobId maps to websocket from which I recieved the message
 			delete(global.Subscribers, jobId)
+		case "ping":
+			// Respond to ping with pong
+			pongMsg := map[string]string{"type": "pong"}
+			pongJSON, err := json.Marshal(pongMsg)
+			if err != nil {
+				log.Println("Error marshalling pong message:", err)
+				continue
+			}
+			err = conn.WriteMessage(websocket.TextMessage, pongJSON)
+			if err != nil {
+				log.Println("Error writing pong message to WebSocket:", err)
+				return
+			}
 		default:
 			log.Println("Unknown message type:", message["type"])
-			err := conn.WriteMessage(websocket.TextMessage, []byte("Unknown message type"))
+			// Send JSON response instead of plain text
+			errorMsg := map[string]string{"type": "error", "message": "Unknown message type"}
+			errorJSON, err := json.Marshal(errorMsg)
+			if err != nil {
+				log.Println("Error marshalling error message:", err)
+				continue
+			}
+			err = conn.WriteMessage(websocket.TextMessage, errorJSON)
 			if err != nil {
 				log.Println("Error writing message to WebSocket:", err)
 				return

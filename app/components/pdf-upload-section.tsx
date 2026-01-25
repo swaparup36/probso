@@ -212,6 +212,7 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
             // Try to parse as JSON, if it fails it might be a plain text message
             let payload
             try {
+              console.log("Event data: ", event.data)
               payload = JSON.parse(event.data)
             } catch (parseError) {
               console.warn("Received non-JSON message from WebSocket:", event.data)
