@@ -25,9 +25,10 @@ func VerifyDodoSubscription(subscriptionID string) (*jsonschemas.DodoSubscriptio
 	client := dodopayments.NewClient(
 		option.WithBearerToken(dodo_api_key),
 	)
+	fmt.Println("The client is, ", client)
 	subscription, err := client.Subscriptions.Get(context.TODO(), subscriptionID)
 	if err != nil {
-		panic(err.Error())
+		return nil, fmt.Errorf("failed to get subscription from Dodo: %w", err)
 	}
 	fmt.Printf("%+v\n", subscription.ProductID)
 
