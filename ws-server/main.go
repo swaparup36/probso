@@ -50,6 +50,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		switch message["type"] {
 		case "subscribe":
 			jobId := message["jobId"].(string)
+			log.Printf("🔔 New subscription request for jobId: %s", jobId)
 
 			// add to global subscribers map --> jobId maps to websocket from which I recieved the message
 			sub := &global.Subscriber{
@@ -61,6 +62,8 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			global.Subscribers[jobId] = sub
 			global.SubsMu.Unlock()
 
+			log.Printf("✅ Subscriber added for jobId: %s", jobId)
+
 			// writer goroutine
 			go func(s *global.Subscriber, jobId string) {
 				defer func() {
@@ -68,19 +71,18 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 					global.SubsMu.Lock()
 					delete(global.Subscribers, jobId)
 					global.SubsMu.Unlock()
+					log.Printf("🗑️  Subscriber removed for jobId: %s", jobId)
 				}()
 
 				for msg := range s.Send {
+					log.Printf("📨 Sending message to jobId %s: %s", jobId, string(msg))
 					err := s.Conn.WriteMessage(websocket.TextMessage, msg)
 					if err != nil {
+						log.Printf("❌ Error sending message to jobId %s: %v", jobId, err)
 						return
 					}
 				}
 			}(sub, jobId)
-
-			println("Subscriber added to jobId:", jobId)
-
-			println("Subscriber added to jobId:", jobId)
 		case "unsubscribe":
 			jobId := message["jobId"].(string)
 
@@ -136,7 +138,7 @@ func listenToJobStatus(redisClient *redis.Client) {
 
 	ch := subscriber.Channel()
 	for msg := range ch {
-		log.Printf("Received job status update: %s", msg.Payload)
+		log.Printf("📨 Received job status update: %s", msg.Payload)
 
 		// Get the jobId from the message payload
 		var statusUpdateMsg struct {
@@ -146,10 +148,11 @@ func listenToJobStatus(redisClient *redis.Client) {
 		}
 		err := json.Unmarshal([]byte(msg.Payload), &statusUpdateMsg)
 		if err != nil {
-			log.Printf("Error unmarshalling job status update: %v", err)
+			log.Printf("❌ Error unmarshalling job status update: %v", err)
 			continue
 		}
 
+		log.Printf("🎯 Attempting to publish to jobId: %s", statusUpdateMsg.JobId)
 		// Publish the message to the corresponding subscriber
 		Publish(statusUpdateMsg.JobId, []byte(msg.Payload))
 	}
@@ -192,16 +195,17 @@ func Publish(jobId string, data []byte) {
 	global.SubsMu.Unlock()
 
 	if !ok {
-		println("Subscriber does not exist")
+		log.Printf("⚠️  No subscriber found for jobId: %s", jobId)
 		return
 	}
 
-	println("Subscriber exists")
+	log.Printf("✅ Subscriber exists for jobId: %s", jobId)
 	select {
 	case sub.Send <- data:
-		println("data sent successfully")
+		log.Printf("📤 Data sent successfully to jobId: %s", jobId)
 		// sent successfully
 	default:
+		log.Printf("⚠️  Channel full for jobId: %s, message dropped", jobId)
 		// channel full → drop or handle backpressure
 	}
 }
