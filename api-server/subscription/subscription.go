@@ -16,16 +16,16 @@ import (
 
 func VerifyDodoSubscription(subscriptionID string) (*jsonschemas.DodoSubscription, error) {
 	dodo_api_key := os.Getenv("DODO_PAYMENTS_API_KEY")
-	if dodo_api_key == "" {
-		return nil, fmt.Errorf("DODO_PAYMENTS_API_KEY is not set")
+	dodo_base_url := os.Getenv("DODO_PAYMENTS_API_BASE_URL")
+	if dodo_api_key == "" || dodo_base_url == "" {
+		return nil, fmt.Errorf("DODO_PAYMENTS_API_KEY or DODO_PAYMENTS_API_BASE_URL is not set")
 	}
-
-	fmt.Println("Dodo api key: ", dodo_api_key)
 
 	client := dodopayments.NewClient(
 		option.WithBearerToken(dodo_api_key),
+		option.WithBaseURL(dodo_base_url),
 	)
-	fmt.Println("The client is, ", client)
+
 	subscription, err := client.Subscriptions.Get(context.TODO(), subscriptionID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get subscription from Dodo: %w", err)
