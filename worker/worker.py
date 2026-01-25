@@ -51,7 +51,7 @@ while True:
         user_id = None
         
         try:
-            write_status(job_id, f"tmp/{job_id}", "processing", 0, r)
+            write_status(job_id, "processing", 0, r)
             conn = get_db_connection()
             cursor = conn.cursor()
             # Update the job status to in_progress
@@ -136,7 +136,7 @@ while True:
         except Exception as e:
             print(f"Job {job_id} failed.")
             print(f"Error: {e}")
-            write_status(job_id, f"tmp/{job_id}", "failed", 0.80, r)
+            write_status(job_id, "failed", 0.80, r)
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute("UPDATE jobs SET status = %s, error_message = %s WHERE id = %s ", ('failed', f'{e}', job_id))

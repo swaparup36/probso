@@ -16,7 +16,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Home, Settings, Menu, X, Plus, FileVideo, Search, History } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Home, Settings, Menu, X, Plus, FileVideo, Search, History, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useUser, SignOutButton, useAuth } from "@clerk/nextjs"
 import axios from "axios"
@@ -47,6 +55,10 @@ export function AppSidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const [recentConversions, setRecentConversions] = useState<conversionInterface[]>([]);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<conversionInterface[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   async function fetchRecentConversions() {
     try {
@@ -81,6 +93,68 @@ export function AppSidebar() {
     } catch (error) {
       console.log("Error fetching recent conversion: ", error)
     }
+  }
+
+  async function searchConversions(query: string) {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      if (!user) {
+        console.log("No user found");
+        return;
+      }
+
+      const token = await getToken();
+
+      if (!token) {
+        console.log("No token found");
+        return;
+      }
+
+      const conversionResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/conversions/${user.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (conversionResponse.status !== 200) {
+        console.log("Failed to fetch conversions");
+        return;
+      }
+
+      const conversionsData = conversionResponse.data.conversions as conversionInterface[];
+      
+      // Filter conversions based on search query
+      const filtered = conversionsData.filter((conversion) =>
+        conversion.Title.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      setSearchResults(filtered);
+
+    } catch (error) {
+      console.log("Error searching conversions: ", error);
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
+  function handleSearchInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value;
+    setSearchQuery(value);
+    searchConversions(value);
+  }
+
+  function handleConversionClick(conversionId: string) {
+    setIsSearchModalOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
+    setIsMobileMenuOpen(false);
+    window.location.href = `/${conversionId}`;
   }
 
   useEffect(() => {
@@ -119,11 +193,12 @@ export function AppSidebar() {
 
           {/* New conversion button */}
           <div className="p-4">
-            <Button asChild className="w-full bg-[#7c7dda] hover:bg-[#6a70de] text-white rounded-full gap-2">
-              <Link href="/">
-                <Plus className="h-4 w-4" />
-                New Conversion
-              </Link>
+            <Button className="w-full bg-[#7c7dda] hover:bg-[#6a70de] text-white rounded-full gap-2" onClick={() => {
+              // reload page
+              window.location.href = "/";
+            }}>
+              <Plus className="h-4 w-4" />
+              New Conversion
             </Button>
           </div>
 
@@ -146,7 +221,10 @@ export function AppSidebar() {
               className={cn(
                 "flex bg-transparent w-full h-12 items-center justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground hover:rounded-full",
               )}
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => {
+                setIsSearchModalOpen(true);
+                setIsMobileMenuOpen(false);
+              }}
             >
               <Search />
               Search
@@ -211,6 +289,73 @@ export function AppSidebar() {
           </div>
         </div>
       </aside>
+
+      {/* Search Modal */}
+      <Dialog open={isSearchModalOpen} onOpenChange={setIsSearchModalOpen}>
+        <DialogContent className="sm:max-w-[600px] bg-[#12131f] border-sidebar-border">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-foreground">Search Conversions</DialogTitle>
+            <DialogDescription className="text-sidebar-foreground/60">
+              Search through your conversion history by title
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-sidebar-foreground/60" />
+              <Input
+                type="text"
+                placeholder="Search by title..."
+                value={searchQuery}
+                onChange={handleSearchInputChange}
+                className="pl-10 bg-[#1a1b2e] border-sidebar-border text-foreground placeholder:text-sidebar-foreground/40"
+                autoFocus
+              />
+            </div>
+            
+            {isSearching && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            )}
+            
+            {!isSearching && searchQuery && searchResults.length === 0 && (
+              <div className="text-center py-8 text-sidebar-foreground/60">
+                No conversions found matching "{searchQuery}"
+              </div>
+            )}
+            
+            {!isSearching && searchResults.length > 0 && (
+              <div className="max-h-[400px] overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent">
+                {searchResults.map((conversion) => (
+                  <button
+                    key={conversion.Id}
+                    onClick={() => handleConversionClick(conversion.Id)}
+                    className="w-full flex items-start gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-sidebar-accent/50 border border-transparent hover:border-sidebar-border"
+                  >
+                    <FileVideo className="h-5 w-5 shrink-0 mt-0.5 text-sidebar-foreground/60" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sidebar-foreground font-medium truncate">{conversion.Title}</p>
+                      <p className="text-xs text-sidebar-foreground/60 mt-1">
+                        Created on {new Date(conversion.CreatedAt).toLocaleDateString("en-US", { 
+                          year: "numeric", 
+                          month: "long", 
+                          day: "numeric" 
+                        })}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {!searchQuery && (
+              <div className="text-center py-8 text-sidebar-foreground/60">
+                Start typing to search your conversions
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

@@ -106,7 +106,7 @@ func GetAllConversions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET")
 
 	var conversions []db.Conversion
-	result := db.Database.Find(&conversions)
+	result := db.Database.Find(&conversions).Limit(5)
 
 	if result.Error != nil {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
@@ -115,6 +115,33 @@ func GetAllConversions(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"message":     "all conversions fetched successfully",
+		"conversions": conversions,
+	})
+}
+
+// Function to search conversions by filename
+func SearchConversionsByFilename(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
+
+	filename := r.URL.Query().Get("filename")
+	userId := r.Header.Get("User-ID")
+
+	if userId == "" {
+		http.Error(w, "missing User-ID in request header", http.StatusBadRequest)
+		return
+	}
+
+	var conversions []db.Conversion
+	result := db.Database.Where("user_id = ? AND filename LIKE ?", userId, "%"+filename+"%").Find(&conversions)
+
+	if result.Error != nil {
+		http.Error(w, "Error searching conversions", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message":     "search results fetched successfully",
 		"conversions": conversions,
 	})
 }

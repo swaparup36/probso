@@ -47,4 +47,5 @@ jobs:
               -p 9090:9090 \
               --restart always \
               ${{ secrets.DOCKERHUB_USERNAME }}/probso-ws-server:latest
+            docker image prune -a -f --filter "until=24h"
           EOF

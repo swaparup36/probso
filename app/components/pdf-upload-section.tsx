@@ -114,12 +114,27 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
     setUploadState("complete")
     setVideoUrl(finalVideoUrl)
     setOutputVidUrl(finalVideoUrl)
-    setJobId(null)
     reconnectAttemptsRef.current = 0
-    if (websocketRef.current) {
+    
+    // Unsubscribe from job updates before closing connection
+    if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN && jobId) {
+      console.log("Unsubscribing from job updates")
+      const unsubscribeMessage = JSON.stringify({ type: "unsubscribe", jobId })
+      websocketRef.current.send(unsubscribeMessage)
+      
+      // Give a brief moment for the message to be sent before closing
+      setTimeout(() => {
+        if (websocketRef.current) {
+          websocketRef.current.close()
+          websocketRef.current = null
+        }
+      }, 100)
+    } else if (websocketRef.current) {
       websocketRef.current.close()
       websocketRef.current = null
     }
+    
+    setJobId(null)
   }
 
   const startGenerationMock = (options?: { autoComplete?: boolean; fallbackVideoUrl?: string }) => {
@@ -235,7 +250,7 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
               finalizeGeneration(payload.output_url)
             }
 
-            if (payload.status && payload.progress) {
+            if (payload.status && payload.progress !== undefined) {
               if (payload.status === "failed") {
                 console.error("Video generation failed", payload)
                 toast({
@@ -246,7 +261,8 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
                 resetUpload()
               } else {
                 console.log("Got job progress: ", payload.progress)
-                setGenerationStage(payload.status)
+                // Map any active processing status to "generating"
+                setGenerationStage("generating")
                 setGenerationProgress(Math.max(0, Math.min(100, payload.progress)))
               }
             }
@@ -496,7 +512,9 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
         const jobIdValue: string | undefined = response.data?.jobId
         if (jobIdValue) {
           setJobId(jobIdValue)
-          startGenerationMock()
+          // Don't start mock - we'll get real progress from WebSocket
+          setGenerationStage("queued")
+          setGenerationProgress(0)
         } else {
           console.warn("Job ID not returned; falling back to mock completion")
           startGenerationMock({ autoComplete: true })
@@ -607,9 +625,9 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
               <div className="flex items-center justify-between text-sm font-medium text-foreground">
                 <span>Video Generation</span>
                 <span>
-                  {generationStage === "queued" && "Queued"}
-                  {generationStage === "generating" && `${Math.round(generationProgress)}%`}
                   {generationStage === "idle" && "Waiting"}
+                  {generationStage !== "idle" && generationProgress > 0 && `${Math.round(generationProgress)}%`}
+                  {generationStage !== "idle" && generationProgress === 0 && "Starting..."}
                 </span>
               </div>
               {generationStage === "idle" && (

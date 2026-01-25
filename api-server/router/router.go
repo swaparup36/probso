@@ -24,6 +24,7 @@ func Router() *mux.Router {
 	// Conversion routes
 	router.Handle("/conversions/{userId}", middleware.ClerkAuthMiddleware(http.HandlerFunc(customHandlers.GetConversionHistoryByUserId))).Methods("GET")
 	router.Handle("/conversion/{conversionId}", middleware.ClerkAuthMiddleware(http.HandlerFunc(customHandlers.GetConversionById))).Methods("GET")
+	router.Handle("/conversions/search", middleware.ClerkAuthMiddleware(http.HandlerFunc(customHandlers.SearchConversionsByFilename))).Methods("GET")
 	// router.HandleFunc("/conversions", customHandlers.GetAllConversions).Methods("GET")
 
 	// Subscription routes

@@ -47,4 +47,5 @@ jobs:
               -p 8080:8080 \
               --restart always \
               ${{ secrets.DOCKERHUB_USERNAME }}/probso-api-server:latest
+            docker image prune -a -f --filter "until=24h"
           EOF

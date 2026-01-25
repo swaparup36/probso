@@ -46,4 +46,5 @@ jobs:
               --env-file /etc/worker/.env \
               --restart always \
               ${{ secrets.DOCKERHUB_USERNAME }}/probso-worker:latest
+            docker image prune -a -f --filter "until=24h"
           EOF
