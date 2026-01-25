@@ -11,6 +11,7 @@ import { useAuth, useUser } from "@clerk/nextjs"
 import axios from "axios"
 import { useRouter } from "next/navigation"
 import { getDodoPlanDetails } from "@/utils/subscriptionHandler"
+import { useToast } from "@/hooks/use-toast"
 
 type UploadState = "idle" | "uploading" | "processing" | "complete"
 
@@ -23,6 +24,7 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
   const router = useRouter()
   const { user } = useUser()
   const { getToken } = useAuth();
+  const { toast } = useToast()
   const [uploadState, setUploadState] = useState<UploadState>("idle")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
@@ -203,6 +205,7 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
         ws.onmessage = (event) => {
           try {
             if (typeof event.data !== "string") {
+              console.warn("Received non-string message from WebSocket")
               return
             }
 
@@ -226,36 +229,25 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
               return
             }
 
-            if (payload.status === "queued") {
-              setGenerationStage("queued")
-            }
-
-            if (payload.status === "processing") {
-              setGenerationStage("generating")
-              if (typeof payload.progress === "number") {
-                setGenerationProgress(Math.max(0, Math.min(100, payload.progress)))
-              }
-            }
-
             if (payload.output_url) {
               console.log("Got output_url: ", payload.output_url)
               finalizeGeneration(payload.output_url)
             }
 
-            if (payload.progress) {
-              console.log("Got job progress: ", payload.progress)
-              setGenerationProgress(Math.max(0, Math.min(100, payload.progress)))
-            }
-
-            if (payload.status === "failed") {
-              console.error("Video generation failed", payload)
-              alert("Video generation failed. Please try again.")
-              resetUpload()
-            }
-
-            if (payload.status === "progress" && typeof payload.progress === "number") {
-              setGenerationStage("generating")
-              setGenerationProgress(Math.max(0, Math.min(100, payload.progress)))
+            if (payload.status && payload.progress) {
+              if (payload.status === "failed") {
+                console.error("Video generation failed", payload)
+                toast({
+                  variant: "destructive",
+                  title: "Video generation failed",
+                  description: "Please try again."
+                })
+                resetUpload()
+              } else {
+                console.log("Got job progress: ", payload.progress)
+                setGenerationStage(payload.status)
+                setGenerationProgress(Math.max(0, Math.min(100, payload.progress)))
+              }
             }
           } catch (error) {
             console.error("Error processing websocket message", error)
@@ -287,7 +279,11 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
             }, delay)
           } else {
             console.error("Max reconnection attempts reached")
-            alert("Lost connection to server. Please refresh the page and check your job status.")
+            toast({
+              variant: "destructive",
+              title: "Connection Lost",
+              description: "Please refresh the page and check your job status."
+            })
           }
         }
       } catch (error) {
@@ -312,7 +308,11 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
       setSelectedFile(file)
       handleUpload(file)
     } else {
-      alert("Please select a PDF file")
+      toast({
+        variant: "destructive",
+        title: "Invalid file type",
+        description: "Please select a PDF file"
+      })
     }
   }
 
@@ -338,7 +338,12 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
 
   const getUserSubscriptionData = async () => {
     if (!user) {
-      return alert("User not logged in");
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "User not logged in"
+      })
+      return;
     }
 
     try {
@@ -387,7 +392,11 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
         const planDetails = await getPlanDetails(planId);
 
         if (!planDetails) {
-          alert("Unable to fetch plan details");
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Unable to fetch plan details"
+          })
           return;
         }
 
@@ -403,7 +412,11 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
       const uploadPDFResponseObj = JSON.parse(uploadPDFResponse)
 
       if (!uploadPDFResponseObj.success) {
-        alert("Error uploading PDF: " + uploadPDFResponseObj.error)
+        toast({
+          variant: "destructive",
+          title: "Upload Error",
+          description: `Error uploading PDF: ${uploadPDFResponseObj.error}`
+        })
         resetUpload()
         return
       }
@@ -415,7 +428,11 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
       console.log("Uploaded PDF URL: ", uploadedPdfUrl)
     } catch (error) {
       console.error("Error uploading PDF:", error)
-      alert("Error uploading PDF: " + error)
+      toast({
+        variant: "destructive",
+        title: "Upload Error",
+        description: `Error uploading PDF: ${error}`
+      })
       resetUpload()
     }
   }
@@ -448,7 +465,11 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
     try {
       const token = await getToken();
       if (!token) {
-        alert("User not authenticated");
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: "User not authenticated"
+        })
         resetUpload();
         return;
       }
@@ -480,7 +501,11 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
           startGenerationMock({ autoComplete: true })
         }
       } else {
-        alert("Failed to submit video generation job: " + (response.data?.message || "Unknown error"))
+        toast({
+          variant: "destructive",
+          title: "Job Submission Failed",
+          description: response.data?.message || "Unknown error"
+        })
       }
     } catch (error) {
       const message = axios.isAxiosError(error)
@@ -488,7 +513,11 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
       : "Unexpected error";
       
       console.log("Error generating video:", message)
-      alert(message);
+      toast({
+        variant: "destructive",
+        title: "Generation Error",
+        description: message
+      })
       resetUpload();
     }
   }

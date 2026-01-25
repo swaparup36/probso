@@ -167,7 +167,11 @@ export default function SettingsPage() {
 					try {
 						const details = await getDodoPlanDetails(normalizedSubscription.PlanId)
                         if (!details) {
-                            alert('Plan details not found');
+                            toast({
+                              variant: "destructive",
+                              title: "Error",
+                              description: "Plan details not found"
+                            })
                             return;
                         }
 

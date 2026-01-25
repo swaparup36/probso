@@ -2,6 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { handleCheckoutSession } from "@/utils/subscriptionHandler";
+import { useToast } from "@/hooks/use-toast";
 
 type Props = {
   planId: string;
@@ -10,11 +11,16 @@ type Props = {
 };
 
 export default function SubscribeButton({ planId, label, popular }: Props) {
+  const { toast } = useToast()
   const onClick = async () => {
     const checkoutUrl = await handleCheckoutSession(planId);
     if (!checkoutUrl) {
         console.error("Failed to get checkout URL");
-        alert("Failed to initiate checkout. Please try again later.");
+        toast({
+          variant: "destructive",
+          title: "Checkout Failed",
+          description: "Failed to initiate checkout. Please try again later."
+        })
         return;
     }
 

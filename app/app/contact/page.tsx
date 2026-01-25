@@ -12,8 +12,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link"
 import { ArrowLeft, Mail, MessageSquare } from "lucide-react"
 import axios from "axios"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ContactPage() {
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -39,7 +41,10 @@ export default function ContactPage() {
       });
 
       if (response.status === 200) {
-        alert("Your message has been sent successfully!")
+        toast({
+          title: "Message Sent",
+          description: "Your message has been sent successfully!"
+        })
         setFormData({
           name: "",
           email: "",
@@ -48,12 +53,20 @@ export default function ContactPage() {
         })
       } else {
         console.log("Error submitting support message: ", response.data);
-        alert("There was an error sending your message. Please try again later.")
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "There was an error sending your message. Please try again later."
+        })
       }
       setIsSubmitting(false)
     } catch (error) {
       console.log("Error submiting support message: ", error);
-      alert("There was an error sending your message. Please try again later.")
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "There was an error sending your message. Please try again later."
+      })
     } finally {
       setIsSubmitting(false)
     }
