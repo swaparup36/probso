@@ -63,7 +63,7 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		tokensToAdd += userTokenBalance.Balance
 	}
 
-	userTokenUpdateResult := db.Database.Model(&userTokenBalance).Where("user_id = ?", body.UserId).Update("token_balance", tokensToAdd)
+	userTokenUpdateResult := db.Database.Model(&userTokenBalance).Where("user_id = ?", body.UserId).Update("balance", tokensToAdd)
 	if userTokenUpdateResult.Error != nil {
 		http.Error(w, "Error updating user token balance", http.StatusInternalServerError)
 		return
