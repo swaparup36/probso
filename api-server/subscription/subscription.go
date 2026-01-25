@@ -16,9 +16,9 @@ import (
 
 func VerifyDodoSubscription(subscriptionID string) (*jsonschemas.DodoSubscription, error) {
 	client := dodopayments.NewClient(
-		option.WithBearerToken("My Bearer Token"),
+		option.WithBearerToken(os.Getenv("DODO_PAYMENTS_API_KEY")),
 	)
-	subscription, err := client.Subscriptions.Get(context.TODO(), "subscription_id")
+	subscription, err := client.Subscriptions.Get(context.TODO(), subscriptionID)
 	if err != nil {
 		panic(err.Error())
 	}
