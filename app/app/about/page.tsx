@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import { ArrowLeft, Target, Users, Zap } from "lucide-react"
+import { Footer } from "@/components/footer"
 
 export default function AboutPage() {
   return (
@@ -117,6 +118,8 @@ export default function AboutPage() {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   )
 }
