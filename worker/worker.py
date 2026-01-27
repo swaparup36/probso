@@ -57,10 +57,16 @@ while True:
             # Update the job status to in_progress
             cursor.execute("UPDATE jobs SET status = %s WHERE id = %s ", ('in_progress', job_id))
             conn.commit()
-            # Get the pdf file url from the database
-            cursor.execute("SELECT pdf_url FROM jobs WHERE id = %s", (job_id,))
-            pdf_url = cursor.fetchone()[0]
+            # Get the pdf file url and user_id from the database in one query
+            cursor.execute("SELECT pdf_url, user_id FROM jobs WHERE id = %s", (job_id,))
+            result = cursor.fetchone()
+            pdf_url = result[0]
+            user_id = result[1]
             conn.close()
+            
+            if not user_id:
+                raise Exception(f"User ID not found for job ID: {job_id}")
+            
             
             # Download the PDF file and save it locally to tmp/{job_id}/input.pdf
             pdf_path = f"tmp/{job_id}/input.pdf"
@@ -91,13 +97,6 @@ while True:
             conn.commit()
             
             title = task_data['title']
-            
-            # Get the user id from the database
-            cursor.execute("SELECT user_id FROM jobs WHERE id = %s", (job_id,))
-            user_id = cursor.fetchone()[0]
-            
-            if not user_id:
-                raise Exception(f"User ID not found for job ID: {job_id}")
             
             # Create a new entry on the conversion table
             cursor.execute(
