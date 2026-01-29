@@ -499,8 +499,9 @@ def make_manim_script(job_id: str, diagrams: list[str]) -> str:
         )
 
         response = openAIClient.chat.completions.create(
-            model="openai/gpt-4.1",
-            max_tokens=2180,
+            # model="openai/gpt-4.1",
+            model="openai/gpt-5.2-pro",
+            max_tokens=6000,
             messages=[{"role": "user", "content": prompt}]
         )
 
