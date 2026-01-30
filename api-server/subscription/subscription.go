@@ -67,9 +67,9 @@ func IsSubscriptionValid(sub *jsonschemas.DodoSubscription, expectedProductID st
 func DetermineTokensForPlan(productID string) int {
 	switch productID {
 	case os.Getenv("NEXT_PUBLIC_DODO_STARTER_PLAN_ID"):
-		return 150
+		return 30
 	case os.Getenv("NEXT_PUBLIC_DODO_CREATOR_PLAN_ID"):
-		return 500
+		return 80
 	default:
 		return 0
 	}

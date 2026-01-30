@@ -32,11 +32,11 @@ export default function PricingPage() {
     {
       id: "pdt_0NX4LAmkycnrjvjCyjWas",
       name: "Starter Plan",
-      price: "$10",
+      price: "$20",
       period: "per month",
       description: "For students & casual users",
       features: [
-        "150 tokens / month",
+        "30 tokens / month",
         "PDFs up to 10 pages",
         "Standard narration voice",
         "Unused tokens do not carry forward",
@@ -48,11 +48,11 @@ export default function PricingPage() {
     {
       id: "pdt_0NX4LAMhk99P9UlUjlIA0",
       name: "Creator Plan",
-      price: "$25",
+      price: "$50",
       period: "per month",
       description: "For content creators & educators",
       features: [
-        "500 tokens / month",
+        "80 tokens / month",
         "PDFs up to 20 pages",
         "Standard narration voice",
         "Shared conversion",
