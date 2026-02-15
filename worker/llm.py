@@ -9,6 +9,7 @@ import subprocess
 from openai import OpenAI
 from codeformattor import normalize_manim_code
 import re
+import base64
 
 load_dotenv()
 
@@ -398,31 +399,35 @@ def make_manim_script(job_id: str, diagrams: list[str]) -> str:
     """
     
     job_dir = f"tmp/{job_id}"
-    pdf_file = client.files.upload(
-        file=f"{job_dir}/input.pdf"
-    )
+    # pdf_file = client.files.upload(
+    #     file=f"{job_dir}/input.pdf"
+    # )
+    with open(f"{job_dir}/input.pdf", "rb") as f:
+        pdf_base64 = base64.b64encode(f.read()).decode("utf-8")
     
-    narration_response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=[
+    response = openAIClient.chat.completions.create(
+        model="openai/gpt-4.1",
+        messages=[
             {
                 "role": "user",
-                "parts": [
+                "content": [
                     {
-                        "file_data": {
-                            "file_uri": pdf_file.uri,
-                            "mime_type": "application/pdf",
-                        }
+                        "type": "text",
+                        "text": AUDIO_PROMPT
                     },
                     {
-                        "text": AUDIO_PROMPT
+                        "type": "file",
+                        "file": {
+                            "filename": "input.pdf",
+                            "file_data": f"data:application/pdf;base64,{pdf_base64}"
+                        }
                     }
                 ]
             }
         ]
     )
     
-    narration = narration_response.text.strip()
+    narration = response.choices[0].message.content.strip()
     # Remove markdown narration fences if present
     if narration.startswith("```"):
         # Remove opening fence (e.g., ```json)
