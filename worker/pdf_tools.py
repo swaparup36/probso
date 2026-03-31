@@ -5,25 +5,28 @@ import numpy as np
 import cv2
 from PIL import Image
 
-def extract_pdf_text(pdf_path: str) -> str:
+def extract_pdf_text(pdf_path: str) -> dict:
     doc = fitz.open(pdf_path)
-    all_text = []
+    all_text = {}
 
     for page in doc:
-        # 1. Normal text layer
+        # for normal text layer
         text = page.get_text().strip()
         if text:
-            all_text.append(text)
+            all_text[page] = text
 
-        # 2. OCR fallback for image-based content
+        # OCR fallback for image-based content
         pix = page.get_pixmap(dpi=300)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
         ocr_text = pytesseract.image_to_string(img, lang="eng")
         if ocr_text.strip():
-            all_text.append(ocr_text)
+            all_text[page] = ocr_text.strip()
 
-    return "\n\n".join(all_text)
+    
+    json_output = {f"page_{i+1}": text for i, text in enumerate(all_text.values())}
+    print("Extracted text from PDF:", json_output)
+    return json_output
 
 def extract_images(pdf_path: str, output_folder: str):
     """

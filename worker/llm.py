@@ -17,41 +17,62 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 openAIClient = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
-    base_url="https://openrouter.ai/api/v1"
+    base_url="https://integrate.api.nvidia.com/v1"
 )
+# openAIClient = OpenAI(
+#     api_key=os.getenv("OPENAI_API_KEY"),
+#     base_url="https://openrouter.ai/api/v1"
+# )
 
 AUDIO_PROMPT = """
-You are an expert teacher.
+You are an expert teacher and content cleaner.
 
-Read the ATTACHED PDF.
+You are given RAW TEXT extracted from a PDF.
+This text may contain:
+- OCR errors (weird symbols like �, broken words)
+- Random line breaks
+- Duplicate lines
+- Misaligned formatting
+- Noise like symbols (#, |, *, etc.)
 
-Your task is to generate clear spoken narration.
+Your FIRST task is to CLEAN and SANITIZE the text:
+- Remove garbage characters and symbols
+- Fix broken words and spacing
+- Remove duplicate or repeated lines
+- Reconstruct proper sentences
+- Preserve ALL meaningful technical content
+- Do NOT lose any important information
+
+Your SECOND task is to UNDERSTAND and STRUCTURE the content:
+- Identify distinct concepts, sections, or diagrams
+- Group related content logically
 
 IMPORTANT PAGE SPLITTING RULE:
-- If a single PDF page contains MORE THAN ONE distinct concept, section, or diagram,
-  you MUST split the narration into MULTIPLE logical pages.
-- Each concept or diagram should have its OWN narration entry.
-- Maintain the original order of concepts as they appear on the page.
-- If a page contains only one concept, keep it as a single narration.
+- If the content contains MORE THAN ONE distinct concept or section,
+  you MUST split into MULTIPLE logical pages
+- Each concept/section should have its OWN narration entry
+- Maintain the original order of concepts
+- If only one concept exists, keep it as one page
 
 Narration rules:
-- Explain concepts like a teacher speaking aloud.
-- Explain diagrams naturally when they appear.
-- Do NOT mention equations symbol-by-symbol.
-- Do NOT include any Manim or animation instructions.
-- Keep the narration natural, continuous, and suitable for voice-over.
+- Explain like a teacher speaking aloud
+- Keep it natural, clear, and easy to follow
+- Expand slightly where needed for clarity
+- Explain diagrams conceptually if referenced
+- Do NOT mention equations symbol-by-symbol
+- Do NOT include any animation or Manim instructions
+- Do NOT mention "PDF" or "extracted text"
 
 Output JSON in this format ONLY:
 
 {
-  "page_1": "spoken narration text for first concept or page...",
-  "page_2": "spoken narration text for next concept...",
-  "page_3": "spoken narration text..."
+  "page_1": "spoken narration...",
+  "page_2": "spoken narration...",
+  "page_3": "spoken narration..."
+  ....
 }
 
-Notes:
-- The output page numbering does NOT need to match the original PDF page numbers.
-- The goal is ONE clear idea or diagram per output page.
+INPUT TEXT:
 """
 
 MANIM_PROMPT = """
@@ -117,6 +138,7 @@ LAYOUT RULES (MANDATORY)
 - Max object height: 80% of frame height.
 - ALWAYS call set_width / set_height / scale BEFORE self.play().
 - ALWAYS position with move_to(), to_edge(), or arrange().
+- Make sure no objects should overlap unless intentional.
 - Prefer:
     text.set_width(config.frame_width * 0.8)
     image.set_height(config.frame_height * 0.6)
@@ -289,7 +311,29 @@ If no valid image path exists for a page or sentence:
     - The Scene MUST still be generated
 
 ==================================================
+🚨 CRITICAL FAILURE CONDITION 🚨
 
+If you use ANY numeric value inside self.wait(), your output is INVALID.
+
+You MUST ONLY use placeholder constants in this exact format:
+    SENTENCE_X_SCENE_Y
+
+Examples:
+    self.wait(SENTENCE_1_SCENE_1)
+    self.wait(SENTENCE_2_SCENE_1)
+
+❌ INVALID (WILL CAUSE SYSTEM FAILURE):
+    self.wait(3)
+    self.wait(6.58)
+    self.wait(4.2 - 1)
+    duration = 5
+
+❌ DO NOT define placeholder variables:
+    SENTENCE_1_SCENE_1 = 2.5
+
+If you violate this rule, the code will crash.
+
+YOU MUST FOLLOW THIS STRICTLY.
 
 Page Data JSON Format:
 {{
@@ -402,32 +446,43 @@ def make_manim_script(job_id: str, diagrams: list[str]) -> str:
     # pdf_file = client.files.upload(
     #     file=f"{job_dir}/input.pdf"
     # )
-    with open(f"{job_dir}/input.pdf", "rb") as f:
-        pdf_base64 = base64.b64encode(f.read()).decode("utf-8")
+    # with open(f"{job_dir}/input.pdf", "rb") as f:
+    #     pdf_base64 = base64.b64encode(f.read()).decode("utf-8")
+    
+    with open(f"{job_dir}/extracted_text.json", "r") as f:
+        extracted_text_json = json.load(f)
     
     response = openAIClient.chat.completions.create(
-        model="openai/gpt-4.1",
+        model="z-ai/glm4.7",
+        temperature=1,
+        top_p=1,
+        max_tokens=16384,
         messages=[
             {
                 "role": "user",
                 "content": [
                     {
                         "type": "text",
-                        "text": AUDIO_PROMPT
-                    },
-                    {
-                        "type": "file",
-                        "file": {
-                            "filename": "input.pdf",
-                            "file_data": f"data:application/pdf;base64,{pdf_base64}"
-                        }
+                        "text": AUDIO_PROMPT + json.dumps(extracted_text_json)
                     }
                 ]
             }
         ]
     )
     
-    narration = response.choices[0].message.content.strip()
+    print("LLM response received: ", response)
+    
+    msg = response.choices[0].message
+
+    if msg.content:
+        narration = msg.content.strip()
+    elif hasattr(msg, "reasoning_content") and msg.reasoning_content:
+        print("⚠️ Model returned reasoning instead of final output")
+        narration = msg.reasoning_content.strip()
+    else:
+        raise ValueError("No usable response from LLM")
+    
+    # narration = response.choices[0].message.content.strip()
     # Remove markdown narration fences if present
     if narration.startswith("```"):
         # Remove opening fence (e.g., ```json)
@@ -505,12 +560,22 @@ def make_manim_script(job_id: str, diagrams: list[str]) -> str:
 
         response = openAIClient.chat.completions.create(
             # model="openai/gpt-4.1",
-            model="openai/gpt-5.2-pro",
-            max_tokens=6000,
+            model="z-ai/glm4.7",
+            temperature=1,
+            top_p=1,
+            max_tokens=16384,
             messages=[{"role": "user", "content": prompt}]
         )
 
-        output = response.choices[0].message.content.strip()
+        msg = response.choices[0].message
+
+        if msg.content:
+            output = msg.content.strip()
+        elif hasattr(msg, "reasoning_content") and msg.reasoning_content:
+            print("⚠️ Model returned reasoning instead of final output")
+            output = msg.reasoning_content.strip()
+        else:
+            raise ValueError("No usable response from LLM")
 
         if output.startswith("```"):
             output = output.split("\n", 1)[1]

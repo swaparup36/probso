@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import shutil
@@ -65,17 +66,19 @@ def process_job_test(job_id: str):
     diagrams_folder = f"{job_dir}/diagrams"
     os.makedirs(diagrams_folder, exist_ok=True)
 
-    # Step 1 — Extract text
+    # Extract text
     # write_status(job_dir, "extracting_text", 0.1)
-    text = extract_pdf_text(pdf_path)
-    open(f"{job_dir}/extracted_text.txt", "w").write(text)
+    json_extract = extract_pdf_text(pdf_path)
+    with open(f"{job_dir}/extracted_text.json", "w") as f:
+        json.dump(json_extract, f)
 
-    # Step 2 — Extract diagrams
+    # Extract diagrams
     # write_status(job_dir, "extracting_diagrams", 0.25)
     diagrams = extract_images(pdf_path, diagrams_folder)
-    open(f"{job_dir}/diagrams_list.txt", "w").write("\n".join(diagrams))
+    with open(f"{job_dir}/diagrams_list.txt", "w") as f:
+        f.write("\n".join(diagrams))
 
-    # Step 3 — Generate Manim code
+    # Generate Manim code
     # write_status(job_dir, "generating_manim_code", 0.50)
     manim_code = make_manim_script(job_id, diagrams)
     
@@ -85,17 +88,16 @@ def process_job_test(job_id: str):
 
     manim_code = sanitize_vgroup_with_images(manim_code)
     manim_code = rewrite_invalid_transforms(manim_code)
-    with open(f"sanitized_manim_code.py", "w", encoding="utf-8") as f:
-        f.write(manim_code)
+    # with open(f"sanitized_manim_code.py", "w", encoding="utf-8") as f:
+    #     f.write(manim_code)
 
     script_path = f"{job_dir}/generated_manim.py"
     with open(script_path, "w", encoding="utf-8") as f:
         f.write("from manim import *\n\n")
         f.write(manim_code)
 
-    # Step 4 — Render video via Manim
+    # Render video via Manim
     # write_status(job_dir, "rendering_video", 0.80)
-
     pre_watermark_output_path = f"{job_dir}/pre_watermark_final.mp4"
     output_path = f"{job_dir}/final.mp4"
     command = [
