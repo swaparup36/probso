@@ -443,6 +443,10 @@ def make_manim_script(job_id: str, diagrams: list[str]) -> str:
     """
     
     job_dir = f"tmp/{job_id}"
+
+    if not os.path.exists(job_dir):
+        os.makedirs(job_dir)
+    
     # pdf_file = client.files.upload(
     #     file=f"{job_dir}/input.pdf"
     # )
