@@ -1,7 +1,9 @@
 import json
 import os
+import re
 import subprocess
 import shutil
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pdf_tools import extract_pdf_text, extract_images
 from llm import make_manim_script
 from codeformattor import sanitize_vgroup_with_images, rewrite_invalid_transforms
@@ -60,6 +62,73 @@ def add_audio_to_video(video_path, audio_path, output_path):
     else:
         print(f"  ffmpeg completed successfully")
 
+def process_video_audio(video_file: str, videos_dir: str, job_dir: str):
+    video_path = os.path.join(videos_dir, video_file)
+    base_name = os.path.splitext(video_file)[0]
+    audio_path = os.path.join(job_dir, f"page_{base_name.removeprefix('Scene')}_narration.mp3")
+
+    print(f"Processing: {video_file}")
+    print(f"  Video path: {video_path}")
+    print(f"  Audio path: {audio_path}")
+    print(f"  Audio exists: {os.path.exists(audio_path)}")
+
+    if not os.path.exists(audio_path):
+        print(f"  WARNING: Audio file not found: {audio_path}")
+        return video_file, False
+
+    output_video_path = os.path.join(videos_dir, f"{base_name}_with_audio.mp4")
+    print(f"  Attaching audio to create: {output_video_path}")
+    add_audio_to_video(video_path, audio_path, output_video_path)
+    os.replace(output_video_path, video_path)
+    print(f"  Successfully attached audio to {video_file}")
+    return video_file, True
+
+def get_manim_scene_names(script_path: str):
+    with open(script_path, "r", encoding="utf-8") as f:
+        code = f.read()
+
+    # Capture classes that inherit from Scene-like Manim base classes.
+    pattern = re.compile(r"^class\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*Scene[^)]*)\)\s*:", re.MULTILINE)
+    return [match.group(1) for match in pattern.finditer(code)]
+
+def render_single_scene(scene_name: str, script_path: str, job_dir: str):
+    scene_media_dir = os.path.join(job_dir, "scene_renders", scene_name)
+    os.makedirs(scene_media_dir, exist_ok=True)
+
+    command = [
+        "manim",
+        "--resolution", "1280,720",   # 720p
+        "--fps", "30",                # 30 FPS
+        script_path,
+        scene_name,
+        "--output_file", scene_name,
+        "--media_dir", scene_media_dir,
+    ]
+
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"Manim render failed for {scene_name}.\n"
+            f"Command: {' '.join(command)}\n"
+            f"STDOUT:\n{result.stdout}\n"
+            f"STDERR:\n{result.stderr}"
+        )
+
+    scene_video_path = os.path.join(
+        scene_media_dir,
+        "videos",
+        "generated_manim",
+        "720p30",
+        f"{scene_name}.mp4",
+    )
+    if not os.path.exists(scene_video_path):
+        raise FileNotFoundError(f"Expected rendered video not found: {scene_video_path}")
+
+    target_videos_dir = os.path.join(job_dir, "videos", "generated_manim", "720p30")
+    os.makedirs(target_videos_dir, exist_ok=True)
+    shutil.copy2(scene_video_path, os.path.join(target_videos_dir, f"{scene_name}.mp4"))
+    return scene_name
+
 def process_job_test(job_id: str):
     job_dir = f"tmp/{job_id}"
     pdf_path = f"{job_dir}/input.pdf"
@@ -80,6 +149,7 @@ def process_job_test(job_id: str):
 
     # Generate Manim code
     # write_status(job_dir, "generating_manim_code", 0.50)
+    print(f"Generating Manim code...")
     manim_code = make_manim_script(job_id, diagrams)
     
     # Store the raw Manim code before sanitization for debugging
@@ -96,21 +166,24 @@ def process_job_test(job_id: str):
         f.write("from manim import *\n\n")
         f.write(manim_code)
 
-    # Render video via Manim
+    # Render videos via Manim (parallel per scene)
     # write_status(job_dir, "rendering_video", 0.80)
     pre_watermark_output_path = f"{job_dir}/pre_watermark_final.mp4"
     output_path = f"{job_dir}/final.mp4"
-    command = [
-        "manim",
-        "--resolution", "1280,720",   # 720p
-        "--fps", "30",                # 30 FPS
-        "-a",                         # render all scenes
-        script_path,
-        "--output_file", "final",
-        "--media_dir", job_dir
-    ]
+    scene_names = get_manim_scene_names(script_path)
+    if not scene_names:
+        raise ValueError("No Manim scene classes found in generated script.")
 
-    subprocess.run(command, check=True)
+    worker_cap = 4
+    auto_workers = min(max(1, os.cpu_count() or 1), len(scene_names))
+    render_workers = min(max(1, worker_cap), len(scene_names)) if worker_cap > 0 else auto_workers
+    with ThreadPoolExecutor(max_workers=render_workers) as executor:
+        futures = [
+            executor.submit(render_single_scene, scene_name, script_path, job_dir)
+            for scene_name in scene_names
+        ]
+        for future in as_completed(futures):
+            future.result()
     
     videos_dir = f"{job_dir}/videos/generated_manim/720p30"
     
@@ -118,25 +191,15 @@ def process_job_test(job_id: str):
     print(f"Looking for videos in: {videos_dir}")
     video_files_list = [f for f in os.listdir(videos_dir) if f.endswith(".mp4")]
     print(f"Found video files: {video_files_list}")
-    
-    for video_file in video_files_list:
-        video_path = os.path.join(videos_dir, video_file)
-        base_name = os.path.splitext(video_file)[0]
-        audio_path = os.path.join(job_dir, f"page_{base_name.removeprefix('Scene')}_narration.mp3")
-        print(f"Processing: {video_file}")
-        print(f"  Video path: {video_path}")
-        print(f"  Audio path: {audio_path}")
-        print(f"  Audio exists: {os.path.exists(audio_path)}")
-        
-        if os.path.exists(audio_path):
-            output_video_path = os.path.join(videos_dir, f"{base_name}_with_audio.mp4")
-            print(f"  Attaching audio to create: {output_video_path}")
-            add_audio_to_video(video_path, audio_path, output_video_path)
-            os.remove(video_path)  # Remove original video without audio
-            os.rename(output_video_path, video_path)  # Rename new video to original name
-            print(f"  Successfully attached audio to {video_file}")
-        else:
-            print(f"  WARNING: Audio file not found: {audio_path}")
+
+    max_workers = min(4, max(1, os.cpu_count() or 1))
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [
+            executor.submit(process_video_audio, video_file, videos_dir, job_dir)
+            for video_file in video_files_list
+        ]
+        for future in as_completed(futures):
+            future.result()
 
     concat_videos_ffmpeg(videos_dir, pre_watermark_output_path)
     add_watermark_to_video(pre_watermark_output_path, output_path)

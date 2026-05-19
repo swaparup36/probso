@@ -1,9 +1,18 @@
 import os
+import re
 import fitz
 import pytesseract
 import numpy as np
 import cv2
 from PIL import Image
+
+def remove_unicode(text):
+    text = re.sub(r'\\u[0-9a-fA-F]{4}', '', text)
+    text = re.sub(r'[^\x00-\x7F]+', '', text)
+    text = re.sub(r'[>\*\#]+', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    return text
 
 def extract_pdf_text(pdf_path: str) -> dict:
     doc = fitz.open(pdf_path)
@@ -24,7 +33,15 @@ def extract_pdf_text(pdf_path: str) -> dict:
             all_text[page] = ocr_text.strip()
 
     
-    json_output = {f"page_{i+1}": text for i, text in enumerate(all_text.values())}
+    # json_output = {f"page_{i+1}": text for i, text in enumerate(all_text.values())}
+    json_output = {}
+    
+    for i, text in enumerate(all_text.values()):
+        page_key = f"page_{i+1}"
+        sanitized_text = remove_unicode(text)
+        # print(f"\n Extracted text for {page_key}:", sanitized_text)
+        json_output[page_key] = sanitized_text
+
     print("Extracted text from PDF:", json_output)
     return json_output
 

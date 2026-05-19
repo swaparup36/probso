@@ -16,3 +16,6 @@ requests
 pdfplumber
 moviepy
 pathvalidate
+opendataloader-pdf
+clean-text
+boto3

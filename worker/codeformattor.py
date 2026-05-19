@@ -30,7 +30,6 @@ def sanitize_vgroup_with_images(code: str) -> str:
     return "\n".join(output)
 
 def rewrite_invalid_transforms(code: str) -> str:
-    import re
     code = re.sub(
         r"ReplacementTransform\(\s*(text\d+)\s*,\s*(vgroup\d+)\s*\)",
         r"FadeOut(\1), FadeIn(\2)",
@@ -69,3 +68,43 @@ def normalize_manim_code(blocks: list[str]) -> str:
         final_lines.append("")
 
     return "\n".join(final_lines)
+
+def replace_urls_with_local_paths(code: str, mapping: dict) -> str:
+    url_to_local = {url: path for path, url in mapping.items()}
+    sorted_urls = sorted(url_to_local.keys(), key=len, reverse=True)
+
+    for url in sorted_urls:
+        local_path = url_to_local[url]
+
+        safe_path = local_path.replace("\\", "/")
+
+        escaped_url = re.escape(url)
+
+        # Replace inside ImageMobject("...")
+        code = re.sub(
+            rf'ImageMobject\(\s*["\']{escaped_url}["\']\s*\)',
+            lambda m: f'ImageMobject("{safe_path}")',
+            code
+        )
+
+        # Replace raw string occurrences
+        code = re.sub(
+            rf'["\']{escaped_url}["\']',
+            lambda m: f'"{safe_path}"',
+            code
+        )
+
+    return code
+
+import re
+
+def fix_variable_names(code: str) -> str:
+    # Replace invalid variable names (very basic cleanup)
+
+    # Replace spaces in variable names
+    code = re.sub(r'(\w+)\s+(\w+)\s*=', r'\1_\2 =', code)
+
+    # Remove non-ascii variable names
+    code = re.sub(r'[^\x00-\x7F]+', '', code)
+
+    return code

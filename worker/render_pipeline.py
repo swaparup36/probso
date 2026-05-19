@@ -87,8 +87,6 @@ def process_job(job_id: str, r: redis.Redis):
 
     manim_code = sanitize_vgroup_with_images(manim_code)
     manim_code = rewrite_invalid_transforms(manim_code)
-    # with open(f"sanitized_manim_code.py", "w", encoding="utf-8") as f:
-    #     f.write(manim_code)
 
     script_path = f"{job_dir}/generated_manim.py"
     with open(script_path, "w", encoding="utf-8") as f:
