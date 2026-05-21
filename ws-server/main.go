@@ -50,7 +50,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		switch message["type"] {
 		case "subscribe":
 			jobId := message["jobId"].(string)
-			log.Printf("🔔 New subscription request for jobId: %s", jobId)
+			log.Printf("New subscription request for jobId: %s", jobId)
 
 			// add to global subscribers map --> jobId maps to websocket from which I recieved the message
 			sub := &global.Subscriber{
@@ -62,7 +62,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			global.Subscribers[jobId] = sub
 			global.SubsMu.Unlock()
 
-			log.Printf("✅ Subscriber added for jobId: %s", jobId)
+			log.Printf("Subscriber added for jobId: %s", jobId)
 
 			// writer goroutine
 			go func(s *global.Subscriber, jobId string) {
@@ -195,17 +195,17 @@ func Publish(jobId string, data []byte) {
 	global.SubsMu.Unlock()
 
 	if !ok {
-		log.Printf("⚠️  No subscriber found for jobId: %s", jobId)
+		log.Printf("No subscriber found for jobId: %s", jobId)
 		return
 	}
 
-	log.Printf("✅ Subscriber exists for jobId: %s", jobId)
+	log.Printf("Subscriber exists for jobId: %s", jobId)
 	select {
 	case sub.Send <- data:
-		log.Printf("📤 Data sent successfully to jobId: %s", jobId)
+		log.Printf("Data sent successfully to jobId: %s", jobId)
 		// sent successfully
 	default:
-		log.Printf("⚠️  Channel full for jobId: %s, message dropped", jobId)
+		log.Printf("Channel full for jobId: %s, message dropped", jobId)
 		// channel full → drop or handle backpressure
 	}
 }

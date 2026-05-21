@@ -48,6 +48,7 @@ func main() {
 			"http://localhost:3000",
 			"http://probso.live",
 			"https://probso.live",
+			"https://www.probso.live",
 			"http://admin.probso.live",
 			"https://admin.probso.live",
 		}),
