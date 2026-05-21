@@ -6,14 +6,23 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
+console.log("DODO_PAYMENTS_API_KEY: ", process.env.DODO_PAYMENTS_API_KEY);
+console.log("DODO_PAYMENTS_ENVIRONMENT: ", process.env.DODO_PAYMENTS_ENVIRONMENT);
+
+const dodoEnvironment: 'test_mode' | 'live_mode' | undefined =
+  process.env.DODO_PAYMENTS_ENVIRONMENT === 'live_mode'
+    ? 'live_mode'
+    : process.env.DODO_PAYMENTS_ENVIRONMENT === 'test_mode'
+    ? 'test_mode'
+    : undefined;
+
 const client = new DodoPayments({
   bearerToken: process.env.DODO_PAYMENTS_API_KEY,
-  environment: 'test_mode', // 'live_mode' for production
+  environment: dodoEnvironment ?? 'test_mode',
 });
 
 export async function handleCheckoutSession(productId: string) {
     try {
-        console.log("DODO_PAYMENTS_API_KEY: ", process.env.DODO_PAYMENTS_API_KEY);
         const session = await client.checkoutSessions.create({
             product_cart: [
                 {
