@@ -18,26 +18,16 @@ from botocore.exceptions import ClientError
 load_dotenv()
 
 def create_bedrock_client():
-    region = os.getenv("BEDROCK_REGION") or "us-east-1"
-
-    # Prefer explicit Bedrock profile or standard AWS profile when available.
-    profile = os.getenv("BEDROCK_AWS_PROFILE") or os.getenv("AWS_PROFILE")
-    if profile:
-        try:
-            return boto3.Session(profile_name=profile).client("bedrock-runtime", region_name=region)
-        except Exception as error:
-            print(f"Warning: Failed to create Bedrock client using profile '{profile}': {error}")
-
-    # Prefer default shared profile before environment credentials (e.g., .env keys).
     try:
-        return boto3.Session(profile_name="default").client("bedrock-runtime", region_name=region)
-    except Exception:
-        return boto3.client("bedrock-runtime", region_name=region)
-
+        client = boto3.client("bedrock-runtime", region_name="us-east-1")
+        return client
+    except ClientError as e:
+        print(f"Error creating Bedrock client: {e}")
+        raise
 
 client = create_bedrock_client()
 
-model_id = os.getenv("BEDROCK_MODEL_ID", "us.amazon.nova-pro-v1:0")
+model_id = "us.amazon.nova-pro-v1:0"
 
 AUDIO_PROMPT = """
 You are an expert teacher.
