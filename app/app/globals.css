@@ -3,81 +3,86 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+  Probso theme — pure black canvas, single lavender accent, geometric sans + terminal mono.
+  The app renders dark-only (see <html className="dark"> in app/layout.tsx), so :root and
+  .dark intentionally carry the same values.
+*/
 :root {
-  /* Updated theme with purple/lavender gradient colors matching the design inspiration */
-  --background: oklch(0.985 0.01 285);
-  --foreground: oklch(0.25 0.02 285);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.25 0.02 285);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.25 0.02 285);
-  --primary: oklch(0.62 0.18 285);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.95 0.02 285);
-  --secondary-foreground: oklch(0.25 0.02 285);
-  --muted: oklch(0.96 0.01 285);
-  --muted-foreground: oklch(0.55 0.02 285);
-  --accent: oklch(0.7 0.15 285);
-  --accent-foreground: oklch(0.99 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.92 0.01 285);
-  --input: oklch(0.92 0.01 285);
-  --ring: oklch(0.62 0.18 285);
-  --chart-1: oklch(0.62 0.18 285);
-  --chart-2: oklch(0.7 0.15 285);
-  --chart-3: oklch(0.8 0.1 285);
-  --chart-4: oklch(0.55 0.2 285);
-  --chart-5: oklch(0.75 0.12 285);
-  --radius: 1rem;
-  --sidebar: oklch(0.96 0.02 285);
-  --sidebar-foreground: oklch(0.25 0.02 285);
-  --sidebar-primary: oklch(0.62 0.18 285);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.92 0.02 285);
-  --sidebar-accent-foreground: oklch(0.25 0.02 285);
-  --sidebar-border: oklch(0.88 0.02 285);
-  --sidebar-ring: oklch(0.62 0.18 285);
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #0a0a0c;
+  --card-foreground: #ffffff;
+  --popover: #0a0a0c;
+  --popover-foreground: #ffffff;
+  --primary: #c7c4f7;
+  --primary-foreground: #000000;
+  --secondary: #141418;
+  --secondary-foreground: #e9e9ef;
+  --muted: #101013;
+  --muted-foreground: #8d8d97;
+  --accent: #14141a;
+  --accent-foreground: #ffffff;
+  --destructive: #ff6b6b;
+  --destructive-foreground: #000000;
+  --border: #1e1e24;
+  --input: #131317;
+  --ring: #c7c4f7;
+  --chart-1: #c7c4f7;
+  --chart-2: #a5a1ef;
+  --chart-3: #8481d9;
+  --chart-4: #e0defb;
+  --chart-5: #5f5da8;
+  --radius: 0.75rem;
+  --sidebar: #000000;
+  --sidebar-foreground: #e9e9ef;
+  --sidebar-primary: #c7c4f7;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #101013;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1a1a1f;
+  --sidebar-ring: #c7c4f7;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #0a0a0c;
+  --card-foreground: #ffffff;
+  --popover: #0a0a0c;
+  --popover-foreground: #ffffff;
+  --primary: #c7c4f7;
+  --primary-foreground: #000000;
+  --secondary: #141418;
+  --secondary-foreground: #e9e9ef;
+  --muted: #101013;
+  --muted-foreground: #8d8d97;
+  --accent: #14141a;
+  --accent-foreground: #ffffff;
+  --destructive: #ff6b6b;
+  --destructive-foreground: #000000;
+  --border: #1e1e24;
+  --input: #131317;
+  --ring: #c7c4f7;
+  --chart-1: #c7c4f7;
+  --chart-2: #a5a1ef;
+  --chart-3: #8481d9;
+  --chart-4: #e0defb;
+  --chart-5: #5f5da8;
+  --sidebar: #000000;
+  --sidebar-foreground: #e9e9ef;
+  --sidebar-primary: #c7c4f7;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #101013;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1a1a1f;
+  --sidebar-ring: #c7c4f7;
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --font-sans: var(--font-poppins), "Poppins", ui-sans-serif, system-ui, sans-serif;
+  /* Only used where digits must align (reset-code input, chart numerals) — system stack, no webfont */
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -117,10 +122,225 @@
 }
 
 @layer base {
+  :root {
+    /* Without this the OS paints native scrollbars and form controls in light mode */
+    color-scheme: dark;
+  }
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
   }
+  ::selection {
+    background: var(--primary);
+    color: #000;
+  }
+}
+
+@layer utilities {
+  /* Display headline — geometric sans, tight and optically balanced */
+  .font-display {
+    font-family: var(--font-sans);
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+  }
+
+  /*
+    Slim overlay scrollbar for inner scroll areas.
+    Firefox and Chromium 121+ use the standard properties; older WebKit falls back to
+    the pseudo-elements (which also drop the stepper arrow buttons).
+  */
+  .scrollbar-slim {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.16);
+    border-radius: 9999px;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .scrollbar-slim::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Small caps eyebrow used above headlines, in nav and as section labels */
+  .eyebrow {
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 0.6875rem;
+    font-weight: 500;
+  }
+
+  /* Fine print under CTAs and in the footer */
+  .fine-note {
+    font-family: var(--font-sans);
+    letter-spacing: 0.03em;
+    font-size: 0.75rem;
+  }
+
+  /* Flat panel replacing the old glassmorphism treatment */
+  .glass-card {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: none !important;
+    transition: border-color 0.25s ease, background-color 0.25s ease;
+  }
+
+  .glass-card:hover {
+    border-color: rgba(199, 196, 247, 0.35) !important;
+  }
+
+  /* Lavender window chrome behind the hero drop zone */
+  .window-chrome {
+    background-color: var(--primary);
+    background-image: repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.55) 0px,
+      rgba(255, 255, 255, 0.55) 2px,
+      rgba(255, 255, 255, 0) 2px,
+      rgba(255, 255, 255, 0) 6px
+    );
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-glow 4s ease-in-out infinite;
+  }
+
+  /* Underline indicator on nav links */
+  .nav-link-hover {
+    position: relative;
+  }
+  .nav-link-hover::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: -3px;
+    left: 0;
+    background-color: var(--primary);
+    transition: width 0.25s ease;
+  }
+  .nav-link-hover:hover::after {
+    width: 100%;
+  }
+}
+
+/*
+  Clerk component overrides.
+
+  Most of the theming is done with `variables` in lib/clerk-appearance.ts. These rules
+  pin the handful of elements whose contrast has to be guaranteed — the social buttons
+  and inputs render dark-on-dark if Clerk's derived scale drifts. Outside @layer and
+  marked !important so they win over Clerk's injected styles.
+*/
+.cl-socialButtonsBlockButton,
+.cl-socialButtonsIconButton,
+.cl-alternativeMethodsBlockButton {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+
+.cl-socialButtonsBlockButton:hover,
+.cl-socialButtonsIconButton:hover,
+.cl-alternativeMethodsBlockButton:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.cl-socialButtonsBlockButtonText,
+.cl-alternativeMethodsBlockButtonText {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.cl-formFieldInput,
+.cl-otpCodeFieldInput,
+.cl-selectButton {
+  background-color: #131317 !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+
+.cl-formFieldInput:focus,
+.cl-otpCodeFieldInput:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(199, 196, 247, 0.25) !important;
+}
+
+.cl-formFieldInput::placeholder {
+  color: var(--muted-foreground) !important;
+}
+
+.cl-formFieldLabel,
+.cl-headerTitle {
+  color: #ffffff !important;
+}
+
+.cl-headerSubtitle,
+.cl-dividerText,
+.cl-footerActionText,
+.cl-formFieldHintText {
+  color: var(--muted-foreground) !important;
+}
+
+.cl-dividerLine {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Black label on the lavender CTA — Clerk defaults this to white */
+.cl-formButtonPrimary {
+  background-color: var(--primary) !important;
+  color: #000000 !important;
+}
+
+.cl-formButtonPrimary:hover {
+  background-color: #ffffff !important;
+}
+
+.cl-formFieldInputShowPasswordButton,
+.cl-formFieldAction,
+.cl-identityPreviewEditButton {
+  color: var(--muted-foreground) !important;
+}
+
+.cl-formFieldInputShowPasswordButton:hover,
+.cl-formFieldAction:hover {
+  color: #ffffff !important;
 }

@@ -3,26 +3,33 @@
 import { Logo } from "@/components/logo"
 import Link from "next/link"
 import { SignIn } from "@clerk/nextjs"
+import { clerkAppearance } from "@/lib/clerk-appearance"
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-accent/20 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
-        <div className="mb-8 flex justify-center">
+        <div className="mb-10 flex justify-center">
           <Logo />
         </div>
 
         <div className="flex justify-center items-center">
-          <SignIn />
+          <SignIn appearance={clerkAppearance} />
         </div>
 
-        <p className="mt-8 text-center text-xs text-muted-foreground">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          <Link href="/forgot-password" className="text-primary hover:underline">
+            Forgot your password?
+          </Link>
+        </p>
+
+        <p className="fine-note mt-8 text-center text-muted-foreground">
           By continuing, you agree to our{" "}
-          <Link href="/terms" className="hover:text-foreground underline">
+          <Link href="/terms" className="text-primary hover:underline">
             Terms of Service
           </Link>{" "}
           and{" "}
-          <Link href="/privacy" className="hover:text-foreground underline">
+          <Link href="/privacy" className="text-primary hover:underline">
             Privacy Policy
           </Link>
         </p>

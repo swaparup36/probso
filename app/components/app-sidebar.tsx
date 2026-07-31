@@ -12,7 +12,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -24,7 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Home, Settings, Menu, X, Plus, FileVideo, Search, History, Loader2 } from "lucide-react"
+import { Home, Settings, Menu, X, Plus, FileVideo, Search, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useUser, SignOutButton, useAuth } from "@clerk/nextjs"
 import axios from "axios"
@@ -34,19 +33,6 @@ interface NavItem {
   href: string
   icon: React.ReactNode
 }
-
-const navItems: NavItem[] = [
-  {
-    label: "Home",
-    href: "/",
-    icon: <Home className="h-5 w-5" />,
-  },
-  {
-    label: "History",
-    href: "/history",
-    icon: <Search className="h-5 w-5" />,
-  },
-]
 
 export function AppSidebar() {
   const { user } = useUser();
@@ -181,19 +167,19 @@ export function AppSidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-40 h-screen w-64 bg-[#12131f] border-r border-sidebar-border transition-transform duration-300 lg:translate-x-0",
+          "fixed top-0 left-0 z-40 h-screen w-64 bg-sidebar border-r border-border transition-transform duration-300 lg:translate-x-0",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center gap-2 px-6 border-b border-sidebar-border">
+          <div className="flex h-16 items-center gap-2 px-6 border-b border-border">
             <Logo />
           </div>
 
           {/* New conversion button */}
           <div className="p-4">
-            <Button className="w-full bg-[#7c7dda] hover:bg-[#6a70de] text-white rounded-full gap-2" onClick={() => {
+            <Button className="w-full bg-primary hover:bg-white text-primary-foreground rounded-lg gap-2 transition-all duration-300" onClick={() => {
               // reload page
               window.location.href = "/";
             }}>
@@ -203,50 +189,50 @@ export function AppSidebar() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 px-3 py-2">
+          <nav className="flex-1 space-y-1.5 px-3 py-2">
             <Link
               href='/'
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200",
                 pathname === '/'
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground rounded-full"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground hover:rounded-full",
+                  ? "bg-primary/15 text-primary shadow-sm shadow-primary/5"
+                  : "text-muted-foreground hover:bg-white/5 hover:text-white",
               )}
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <Home />
+              <Home className="h-5 w-5" />
               Home
             </Link>
             <Button
               className={cn(
-                "flex bg-transparent w-full h-12 items-center justify-start gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground hover:rounded-full",
+                "flex bg-transparent w-full h-10 items-center justify-start gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 text-muted-foreground hover:bg-white/5 hover:text-white cursor-pointer border-0",
               )}
               onClick={() => {
                 setIsSearchModalOpen(true);
                 setIsMobileMenuOpen(false);
               }}
             >
-              <Search />
+              <Search className="h-5 w-5" />
               Search
             </Button>
 
             {/* Recent conversions */}
-            <div className="pt-6 h-[50svh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 hover:scrollbar-thumb-gray-500 scrollbar-track-transparent scrollbar-thumb-rounded-full">
-              <p className="px-3 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider mb-2">
-                Recent
+            <div className="pt-6 h-[48svh] overflow-y-auto scrollbar-slim">
+              <p className="eyebrow px-4 text-muted-foreground mb-3">
+                Recent Conversions
               </p>
               <div className="space-y-1">
                 {recentConversions.map((conversion) => (
                   <Link
                     key={conversion.Id}
                     href={`/${conversion.Id}`}
-                    className="flex items-start gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-sidebar-accent/50"
+                    className="flex items-start gap-3 rounded-lg px-4 py-2.5 text-sm transition-colors duration-200 hover:bg-white/5 group"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <FileVideo className="h-4 w-4 shrink-0 mt-0.5 text-sidebar-foreground/60" />
+                    <FileVideo className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground group-hover:text-primary transition-colors duration-250" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sidebar-foreground font-medium truncate">{conversion.Title}</p>
-                      <p className="text-xs text-sidebar-foreground/60">{new Date(conversion.CreatedAt).toLocaleDateString("en-CA")}</p>
+                      <p className="text-foreground font-medium truncate group-hover:text-white transition-colors duration-250">{conversion.Title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{new Date(conversion.CreatedAt).toLocaleDateString("en-CA")}</p>
                     </div>
                   </Link>
                 ))}
@@ -255,31 +241,31 @@ export function AppSidebar() {
           </nav>
 
           {/* User profile */}
-          <div className="border-t border-sidebar-border p-4">
+          <div className="border-t border-border p-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex w-full items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-sidebar-accent">
-                  <Avatar className="h-9 w-9">
+                <button className="flex w-full items-center gap-3 rounded-xl px-3 py-2 transition-all duration-200 hover:bg-white/5 text-left">
+                  <Avatar className="h-9 w-9 border border-border">
                     <AvatarImage src={user?.imageUrl} alt="User" />
                     <AvatarFallback className="bg-primary text-primary-foreground">JD</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 text-left">
-                    <p className="text-sm font-medium text-sidebar-foreground">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-xs text-sidebar-foreground/60">{user?.emailAddresses[0]?.emailAddress.slice(0, 20).concat("...")}</p>
+                  <div className="flex-1 text-left min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{user?.firstName} {user?.lastName}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user?.emailAddresses[0]?.emailAddress}</p>
                   </div>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild>
+              <DropdownMenuContent align="end" className="w-56 bg-popover border-border">
+                <DropdownMenuItem asChild className="hover:bg-white/5 focus:bg-white/5 text-white cursor-pointer">
                   <Link href="/settings">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-white/5" />
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700 mt-2"
+                  className="w-full justify-start text-red-400 border-0 hover:bg-red-500/10 hover:text-red-300 mt-1 rounded-lg cursor-pointer"
                   asChild
                 >
                   <SignOutButton />
@@ -292,22 +278,22 @@ export function AppSidebar() {
 
       {/* Search Modal */}
       <Dialog open={isSearchModalOpen} onOpenChange={setIsSearchModalOpen}>
-        <DialogContent className="sm:max-w-[600px] bg-[#12131f] border-sidebar-border">
+        <DialogContent className="sm:max-w-[600px] bg-popover border-border rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-foreground">Search Conversions</DialogTitle>
-            <DialogDescription className="text-sidebar-foreground/60">
+            <DialogTitle className="text-xl font-medium text-white">Search Conversions</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Search through your conversion history by title
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-sidebar-foreground/60" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search by title..."
                 value={searchQuery}
                 onChange={handleSearchInputChange}
-                className="pl-10 bg-[#1a1b2e] border-sidebar-border text-foreground placeholder:text-sidebar-foreground/40"
+                className="pl-10 bg-input border-border text-white placeholder:text-muted-foreground rounded-lg focus-visible:ring-primary"
                 autoFocus
               />
             </div>
@@ -325,7 +311,7 @@ export function AppSidebar() {
             )}
             
             {!isSearching && searchResults.length > 0 && (
-              <div className="max-h-[400px] overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent">
+              <div className="max-h-[400px] overflow-y-auto space-y-2 scrollbar-slim">
                 {searchResults.map((conversion) => (
                   <button
                     key={conversion.Id}

@@ -1,134 +1,115 @@
-import { Logo } from "@/components/logo"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Header } from "@/components/header"
+import { Card, CardDescription, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
-import { ArrowRight, Zap, Brain, BookOpen } from "lucide-react"
+import { Zap, Brain, BookOpen } from "lucide-react"
 import { auth } from "@clerk/nextjs/server";
 import Converter from "@/components/converter";
-import Spline from '@splinetool/react-spline/next';
 import FeatureCard from "@/components/ui/feature-card";
-import LiquidEther from "@/components/liquid-ether"
 import { Footer } from "@/components/footer"
+import { HeroDropzone } from "@/components/hero-dropzone"
 
 
 export default async function LandingPage() {
   const { userId } = await auth();
 
   if (userId) {
-    console.log("first")
     return (
       <Converter />
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/20">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex justify-start">
-            <Logo />
-          </div>
-          <nav className="flex items-center gap-4">
-            <Link
-              href="/about"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-block"
-            >
-              About
-            </Link>
-            <Link
-              href="/pricing"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:inline-block"
-            >
-              Pricing
-            </Link>
-            <Button variant="ghost" asChild className="bg-transparent">
-              <Link href="/login">Sign in</Link>
-            </Button>
-            <Button asChild className="rounded-full bg-[#7c7dda] hover:bg-[#6a70de] text-sm text-white">
-              <Link href="/signup">Get Started</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
-      
+      <Header />
 
       {/* Hero section */}
-      <section className="px-4 h-screen relative bg-[#c3bcf0]">
-        {/* Right: Spline scene */}
-        <Spline
-          className="absolute right-0 top-0 w-1/2 h-full z-0"
-          scene="https://prod.spline.design/nPcJUmHWdQjpwVv1/scene.splinecode"
-        />
+      <section className="relative">
+        <div className="container mx-auto px-6 py-20 md:py-28 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-12 items-center">
+          {/* Left: Text */}
+          <div className="flex flex-col items-start text-left">
+            <div className="eyebrow flex items-center gap-2.5 text-white/70 mb-10">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse-slow" />
+              PDF → Narrated Video
+            </div>
 
-        {/* Left: Text */}
-        <div className="relative z-30 w-full md:w-1/2 py-20 px-20">
-          <h1 className="text-4xl md:text-6xl font-bold text-[#E5E5FE] leading-tight mb-6">
-            Transform PDFs <br />
-            into Video <br />
-            Lessons
-          </h1>
+            <h1 className="font-display text-6xl md:text-7xl xl:text-[5.5rem] font-medium mb-10">
+              <span className="block text-white">Your PDF,</span>
+              <span className="block text-primary">watchable.</span>
+            </h1>
 
-          <p className="text-lg text-[#B0B3F3] max-w-xl mb-10">
-            Convert textbooks and documents into engaging video explanations.
-            Learn faster with AI-powered visual content tailored to your learning style.
-          </p>
+            <p className="text-lg md:text-xl text-white/85 max-w-lg mb-12 leading-relaxed font-light">
+              Probso reads the document, writes the script, and renders a narrated video — figures,
+              charts and page citations intact.
+            </p>
 
-          <div className="flex items-center">
-            <Link
-              className="group flex items-center gap-3 h-14 px-4 rounded-full 
-                        bg-[#7c7dda] hover:bg-[#6a70de] 
-                        text-white text-base font-medium 
-                        transition-all"
-              href="/login"
-            >
-              Generate Video
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20">
-                ↗
-              </span>
-            </Link>
-          </div>
-        </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link
+                href="/sign-up"
+                className="flex h-12 items-center justify-center rounded-lg bg-primary px-7 text-[15px] font-medium text-primary-foreground transition-colors duration-200 hover:bg-white"
+              >
+                Upload a PDF
+              </Link>
+              <Link
+                href="/pricing"
+                className="flex h-12 items-center justify-center rounded-lg border border-white px-7 text-[15px] font-medium text-white transition-colors duration-200 hover:bg-white hover:text-black"
+              >
+                Watch a sample
+              </Link>
+            </div>
 
-      </section>
-
-      {/* Features section */}
-      <section className="container mx-auto px-4 py-20 bg-[#0b0b16]">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl text-[#E5E5FE] font-bold mb-4">Why Choose PDF2Video?</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Experience a revolutionary way to learn with AI-generated video explanations
+            <p className="fine-note text-muted-foreground mt-8">
+              Free plan included · up to 20 pages per PDF
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <FeatureCard className="custom-spotlight-card" spotlightColor="rgba(176, 181, 246, 0.2)">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg mb-4">
-                <Zap className="h-6 w-6 text-[#9e9ee1]" />
+          {/* Right: Drop zone */}
+          <div className="w-full">
+            <HeroDropzone />
+          </div>
+        </div>
+      </section>
+
+      {/* Features section */}
+      <section className="relative py-24 md:py-32 border-t border-border">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <div className="max-w-2xl mb-16 space-y-5">
+            <p className="eyebrow text-primary">Why Probso</p>
+            <h2 className="font-display text-4xl md:text-5xl font-medium text-white">
+              Built for how you actually study.
+            </h2>
+            <p className="text-lg text-muted-foreground font-light leading-relaxed">
+              Experience a revolutionary way to learn with AI-generated video explanations.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <FeatureCard className="glass-card" spotlightColor="rgba(199, 196, 247, 0.08)">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 mb-6">
+                <Zap className="h-5 w-5 text-primary" />
               </div>
-              <CardTitle className="mb-2">Lightning Fast</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg font-medium text-white mb-3">Lightning Fast</CardTitle>
+              <CardDescription className="text-sm text-muted-foreground leading-relaxed">
                 Get your video explanations in minutes. Our AI processes PDFs quickly and efficiently.
               </CardDescription>
             </FeatureCard>
 
-            <FeatureCard className="custom-spotlight-card" spotlightColor="rgba(176, 181, 246, 0.2)">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg mb-4">
-                <Brain className="h-6 w-6 text-[#9e9ee1]" />
+            <FeatureCard className="glass-card" spotlightColor="rgba(199, 196, 247, 0.08)">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 mb-6">
+                <Brain className="h-5 w-5 text-primary" />
               </div>
-              <CardTitle className="mb-2">AI-Powered Learning</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg font-medium text-white mb-3">AI-Powered Learning</CardTitle>
+              <CardDescription className="text-sm text-muted-foreground leading-relaxed">
                 Advanced AI understands complex concepts and creates clear, engaging visual explanations.
               </CardDescription>
             </FeatureCard>
 
-            <FeatureCard className="custom-spotlight-card" spotlightColor="rgba(176, 181, 246, 0.2)">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg mb-4">
-                <BookOpen className="h-6 w-6 text-[#9e9ee1]" />
+            <FeatureCard className="glass-card" spotlightColor="rgba(199, 196, 247, 0.08)">
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 mb-6">
+                <BookOpen className="h-5 w-5 text-primary" />
               </div>
-              <CardTitle className="mb-2">Better Retention</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg font-medium text-white mb-3">Better Retention</CardTitle>
+              <CardDescription className="text-sm text-muted-foreground leading-relaxed">
                 Studies show visual learning increases retention by up to 65%. Make learning stick.
               </CardDescription>
             </FeatureCard>
@@ -137,37 +118,29 @@ export default async function LandingPage() {
       </section>
 
       {/* CTA section */}
-      <div style={{ width: '100%', height: 600, position: 'relative' }}>
-      <LiquidEther
-        colors={[ '#5227FF', '#FF9FFC', '#B19EEF' ]}
-        mouseForce={20}
-        cursorSize={100}
-        isViscous={false}
-        viscous={30}
-        iterationsViscous={32}
-        iterationsPoisson={32}
-        resolution={0.5}
-        isBounce={false}
-        autoDemo={true}
-        autoSpeed={0.5}
-        autoIntensity={2.2}
-        takeoverDuration={0.25}
-        autoResumeDelay={3000}
-        autoRampDuration={0.6}
-      >
-        <Card className="max-w-4xl mx-auto border-border/50 shadow-xl bg-[#252435]/70 from-primary/5 to-accent/5">
-          <CardContent className="p-12 text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground text-balance">Ready to Learn Smarter?</h2>
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              Join thousands of students who are transforming the way they study
-            </p>
-            <Button size="lg" asChild className="h-12 px-8 bg-[#7c7dda] hover:bg-[#6a70de] text-white text-base rounded-full">
-              <Link href="/signup">Get Started Free</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </LiquidEther>
-    </div>
+      <section className="relative py-24 md:py-32 border-t border-border">
+        <div className="container mx-auto px-6">
+          <Card className="glass-card max-w-4xl mx-auto rounded-2xl">
+            <div className="p-10 md:p-16 text-center space-y-7">
+              <p className="eyebrow text-primary">Get started</p>
+              <h2 className="font-display text-4xl md:text-5xl font-medium text-white text-balance">
+                Ready to learn smarter?
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-xl mx-auto font-light">
+                Join thousands of students who are transforming the way they study.
+              </p>
+              <div className="flex justify-center pt-2">
+                <Link
+                  href="/sign-up"
+                  className="flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-[15px] font-medium text-primary-foreground transition-colors duration-200 hover:bg-white"
+                >
+                  Get Started Free
+                </Link>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </section>
 
       <Footer />
     </div>

@@ -306,15 +306,15 @@ export default function SettingsPage() {
 	const shouldShowSkeleton = (!isLoaded || isLoading) && !lastSynced && !error
 
 	return (
-		<div className="flex min-h-screen bg-[#05050d] text-white">
+		<div className="flex min-h-screen bg-background text-white">
 			<AppSidebar />
-			<main className="flex-1 lg:ml-64 bg-gradient-to-b from-[#0a0a1a] via-[#0d0d1f] to-[#05050d]">
+			<main className="flex-1 lg:ml-64 bg-background">
 				<div className="mx-auto max-w-6xl px-6 py-10 space-y-8">
 					<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 						<div>
 							<p className="text-xs uppercase tracking-[0.3em] text-white/60">Account Center</p>
-							<h1 className="text-3xl font-semibold text-[#E5E5FE]">Settings & Billing</h1>
-							<p className="text-sm text-[#B0B3F3]">
+							<h1 className="text-3xl font-semibold text-white">Settings & Billing</h1>
+							<p className="text-sm text-muted-foreground">
 								Review your profile, monitor usage, and keep your subscription up to date.
 							</p>
 						</div>
@@ -338,13 +338,13 @@ export default function SettingsPage() {
 					{shouldShowSkeleton && <SettingsSkeleton />}
 
 					{!shouldShowSkeleton && !user && (
-						<Card className="border border-white/10 bg-white/5">
+						<Card className="border border-border bg-white/5">
 							<CardHeader>
 								<CardTitle>Sign-in required</CardTitle>
 								<CardDescription>Access account settings by signing into your workspace.</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Button asChild className="rounded-full bg-[#7c7dda] hover:bg-[#6a70de]">
+								<Button asChild className="rounded-lg bg-primary hover:bg-primary/85">
 									<Link href="/sign-in">Go to sign in</Link>
 								</Button>
 							</CardContent>
@@ -373,53 +373,53 @@ export default function SettingsPage() {
 					{!shouldShowSkeleton && user && !error && (
 						<div className="space-y-8">
 							<div className="grid gap-4 md:grid-cols-3">
-								<Card className="border border-white/10 bg-white/5">
+								<Card className="border border-border bg-white/5">
 									<CardHeader className="flex flex-row items-center justify-between space-y-0">
 										<div>
 											<CardDescription className="text-white/70">Plan</CardDescription>
-											<CardTitle className="text-xl text-[#E5E5FE]">{planMeta?.name ?? "No plan"}</CardTitle>
+											<CardTitle className="text-xl text-white">{planMeta?.name ?? "No plan"}</CardTitle>
 										</div>
-										<Sparkles className="h-5 w-5 text-[#B0B3F3]" />
+										<Sparkles className="h-5 w-5 text-muted-foreground" />
 									</CardHeader>
 									<CardContent>
-										<p className="text-sm text-[#B0B3F3]">{planPriceLabel}</p>
+										<p className="text-sm text-muted-foreground">{planPriceLabel}</p>
 									</CardContent>
 								</Card>
-								<Card className="border border-white/10 bg-white/5">
+								<Card className="border border-border bg-white/5">
 									<CardHeader className="flex flex-row items-center justify-between space-y-0">
 										<div>
 											<CardDescription className="text-white/70">Status</CardDescription>
-											<CardTitle className="text-xl text-[#E5E5FE]">{formatStatus(subscription?.Status)}</CardTitle>
+											<CardTitle className="text-xl text-white">{formatStatus(subscription?.Status)}</CardTitle>
 										</div>
-										<CheckCircle2 className="h-5 w-5 text-[#B0B3F3]" />
+										<CheckCircle2 className="h-5 w-5 text-muted-foreground" />
 									</CardHeader>
 									<CardContent>
 										<Badge className={statusBadgeClass}>{formatStatus(subscription?.Status)}</Badge>
 									</CardContent>
 								</Card>
-								<Card className="border border-white/10 bg-white/5">
+								<Card className="border border-border bg-white/5">
 									<CardHeader className="flex flex-row items-center justify-between space-y-0">
 										<div>
 											<CardDescription className="text-white/70">Tokens</CardDescription>
-											<CardTitle className="text-xl text-[#E5E5FE]">
+											<CardTitle className="text-xl text-white">
 												{(tokenBalance?.Balance ?? 0).toLocaleString("en-US")}
 											</CardTitle>
 										</div>
-										<Activity className="h-5 w-5 text-[#B0B3F3]" />
+										<Activity className="h-5 w-5 text-muted-foreground" />
 									</CardHeader>
 									<CardContent>
-										<p className="text-sm text-[#B0B3F3]">{tokensOnHold} on hold</p>
+										<p className="text-sm text-muted-foreground">{tokensOnHold} on hold</p>
 									</CardContent>
 								</Card>
 							</div>
 
 							<div className="grid gap-6 lg:grid-cols-2">
-								<Card className="border border-white/10 bg-white/5">
+								<Card className="border border-border bg-white/5">
 									<CardHeader>
-										<CardTitle className="flex items-center gap-2 text-[#E5E5FE]">
+										<CardTitle className="flex items-center gap-2 text-white">
 											<ShieldCheck className="h-5 w-5" /> Account information
 										</CardTitle>
-										<CardDescription className="text-[#B0B3F3]">
+										<CardDescription className="text-muted-foreground">
 											Pulled from your Clerk profile and internal role records.
 										</CardDescription>
 									</CardHeader>
@@ -432,38 +432,38 @@ export default function SettingsPage() {
 											<div>
 												<p className="text-xs uppercase tracking-wide text-white/60">Email</p>
 												<div className="flex items-center gap-2 text-white">
-													<Mail className="h-4 w-4 text-[#B0B3F3]" />
+													<Mail className="h-4 w-4 text-muted-foreground" />
 													<span className="truncate text-sm">{emailAddress}</span>
 												</div>
 											</div>
 											<div>
 												<p className="text-xs uppercase tracking-wide text-white/60">User ID</p>
 												<div className="flex items-center gap-2 text-white">
-													<KeyRound className="h-4 w-4 text-[#B0B3F3]" />
+													<KeyRound className="h-4 w-4 text-muted-foreground" />
 													<span className="text-sm">{user.id}</span>
 												</div>
 											</div>
 											<div>
 												<p className="text-xs uppercase tracking-wide text-white/60">Member since</p>
 												<div className="flex items-center gap-2 text-white">
-													<UserIcon className="h-4 w-4 text-[#B0B3F3]" />
+													<UserIcon className="h-4 w-4 text-muted-foreground" />
 													<span className="text-sm">{memberSince ?? "—"}</span>
 												</div>
 											</div>
 										</div>
 										<div className="flex flex-wrap items-center gap-3">
-											<Badge className="bg-[#7c7dda]/30 text-[#E5E5FE] border-[#7c7dda]/60">Role: {userRole}</Badge>
+											<Badge className="bg-primary/15 text-primary border-primary/40">Role: {userRole}</Badge>
 											<Badge className="bg-white/10 text-white border-white/20">Clerk synced</Badge>
 										</div>
 									</CardContent>
 								</Card>
 
-								<Card className="border border-white/10 bg-white/5">
+								<Card className="border border-border bg-white/5">
 									<CardHeader>
-										<CardTitle className="flex items-center gap-2 text-[#E5E5FE]">
+										<CardTitle className="flex items-center gap-2 text-white">
 											<Activity className="h-5 w-5" /> Token usage
 										</CardTitle>
-										<CardDescription className="text-[#B0B3F3]">
+										<CardDescription className="text-muted-foreground">
 											Tokens are consumed every time you convert a PDF into a video lesson.
 										</CardDescription>
 									</CardHeader>
@@ -476,11 +476,11 @@ export default function SettingsPage() {
 											<p className="text-sm text-white/70">{tokensOnHold} tokens currently locked in running jobs</p>
 										</div>
 										<div className="grid gap-3 sm:grid-cols-2">
-											<div className="rounded-xl border border-white/10 p-4">
+											<div className="rounded-xl border border-border p-4">
 												<p className="text-xs text-white/60">On hold</p>
 												<p className="text-lg text-white">{tokensOnHold}</p>
 											</div>
-											<div className="rounded-xl border border-white/10 p-4">
+											<div className="rounded-xl border border-border p-4">
 												<p className="text-xs text-white/60">Last updated</p>
 												<p className="text-lg text-white">{tokenUpdatedAt}</p>
 											</div>
@@ -496,12 +496,12 @@ export default function SettingsPage() {
 							</div>
 
 							<div className="grid gap-6 lg:grid-cols-2">
-								<Card className="border border-white/10 bg-white/5">
+								<Card className="border border-border bg-white/5">
 									<CardHeader>
-										<CardTitle className="flex items-center gap-2 text-[#E5E5FE]">
+										<CardTitle className="flex items-center gap-2 text-white">
 											<CreditCard className="h-5 w-5" /> Current subscription
 										</CardTitle>
-										<CardDescription className="text-[#B0B3F3]">
+										<CardDescription className="text-muted-foreground">
 											Synced directly from the billing service.
 										</CardDescription>
 									</CardHeader>
@@ -512,21 +512,21 @@ export default function SettingsPage() {
 													<h3 className="text-2xl font-semibold text-white">{planMeta?.name ?? subscription.PlanId}</h3>
 													<Badge className={statusBadgeClass}>{formatStatus(subscription.Status)}</Badge>
 												</div>
-												<p className="text-sm text-[#B0B3F3]">{planMeta?.description ?? "You’re all set for unlimited conversions within your plan limits."}</p>
+												<p className="text-sm text-muted-foreground">{planMeta?.description ?? "You’re all set for unlimited conversions within your plan limits."}</p>
 												<div className="grid gap-3 sm:grid-cols-2">
-													<div className="rounded-xl border border-white/10 p-4">
+													<div className="rounded-xl border border-border p-4">
 														<p className="text-xs text-white/60">Plan ID</p>
 														<p className="text-sm text-white">{subscription.PlanId}</p>
 													</div>
-													<div className="rounded-xl border border-white/10 p-4">
+													<div className="rounded-xl border border-border p-4">
 														<p className="text-xs text-white/60">Subscription ID</p>
 														<p className="text-sm text-white">{subscription.SubscriptionId}</p>
 													</div>
-													<div className="rounded-xl border border-white/10 p-4">
+													<div className="rounded-xl border border-border p-4">
 														<p className="text-xs text-white/60">Customer ID</p>
 														<p className="text-sm text-white">{subscription.CustomerId}</p>
 													</div>
-													<div className="rounded-xl border border-white/10 p-4">
+													<div className="rounded-xl border border-border p-4">
 														<p className="text-xs text-white/60">Billing cadence</p>
 														<p className="text-sm text-white">Monthly</p>
 													</div>
@@ -536,7 +536,7 @@ export default function SettingsPage() {
 													<ul className="space-y-2 text-sm text-white">
 														{planHighlights.map((highlight) => (
 															<li key={highlight} className="flex items-center gap-2">
-																<CheckCircle2 className="h-4 w-4 text-[#7c7dda]" /> {highlight}
+																<CheckCircle2 className="h-4 w-4 text-primary" /> {highlight}
 															</li>
 														))}
 													</ul>
@@ -548,7 +548,7 @@ export default function SettingsPage() {
 																Cancel subscription
 															</Button>
 														</AlertDialogTrigger>
-														<AlertDialogContent className="bg-[#0d0d1f] text-white border-white/10">
+														<AlertDialogContent className="glass-card text-white">
 															<AlertDialogHeader>
 																<AlertDialogTitle>Cancel subscription?</AlertDialogTitle>
 																<AlertDialogDescription className="text-white/70">
@@ -580,7 +580,7 @@ export default function SettingsPage() {
 												<p className="text-sm text-white/70 mt-2">
 													Upgrade to unlock more conversions, longer PDFs, and faster processing slots.
 												</p>
-												<Button asChild className="mt-4 rounded-full bg-[#7c7dda] hover:bg-[#6a70de]">
+												<Button asChild className="mt-4 rounded-lg bg-primary hover:bg-primary/85">
 													<Link href="/pricing">Browse plans</Link>
 												</Button>
 											</div>
@@ -588,25 +588,25 @@ export default function SettingsPage() {
 									</CardContent>
 								</Card>
 
-								<Card className="border border-white/10 bg-white/5">
+								<Card className="border border-border bg-white/5">
 									<CardHeader>
-										<CardTitle className="flex items-center gap-2 text-[#E5E5FE]">
+										<CardTitle className="flex items-center gap-2 text-white">
 											<CalendarClock className="h-5 w-5" /> Support & receipts
 										</CardTitle>
-										<CardDescription className="text-[#B0B3F3]">
+										<CardDescription className="text-muted-foreground">
 											Need help with billing or compliance? We’re one click away.
 										</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-4">
-										<div className="rounded-xl border border-white/10 p-4">
+										<div className="rounded-xl border border-border p-4">
 											<p className="text-sm text-white/80">Email our billing desk for invoices, refunds, or VAT-ready receipts.</p>
 											<Button asChild variant="outline" className="mt-4 border-white/30 text-white w-full">
 												<Link href="mailto:billing@pdf2video.ai?subject=Billing%20support">Email billing</Link>
 											</Button>
 										</div>
-										<div className="rounded-xl border border-white/10 p-4">
+										<div className="rounded-xl border border-border p-4">
 											<p className="text-sm text-white/80">Need to talk live? Schedule a quick session with success engineering.</p>
-											<Button asChild className="mt-4 w-full rounded-full bg-[#7c7dda] hover:bg-[#6a70de]">
+											<Button asChild className="mt-4 w-full rounded-lg bg-primary hover:bg-primary/85">
 												<Link href="https://cal.com/pdf2video/success" target="_blank" rel="noreferrer noopener">
 													Schedule a call
 												</Link>

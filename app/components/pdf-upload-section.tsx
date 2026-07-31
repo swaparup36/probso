@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useCallback, useRef, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Upload, FileText, Loader2, Play } from "lucide-react"
+import { Loader2, Play } from "lucide-react"
 import uploadPDF from "@/utils/uploader"
 import { useAuth, useUser } from "@clerk/nextjs"
 import axios from "axios"
@@ -543,27 +543,27 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
 
   if (uploadState === "complete" && videoUrl) {
     return (
-      <Card className="overflow-hidden border-blue-900 bg-[#4C4B6E] shadow-lg">
-        <div className="aspect-video w-full bg-black">
-          <video controls className="h-full w-full">
+      <Card className="glass-card rounded-2xl overflow-hidden border border-border">
+        <div className="aspect-video w-full bg-black border-b border-border relative group">
+          <video controls className="h-full w-full object-cover">
             <source src={videoUrl} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
-        <div className="p-6 space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Play className="h-5 w-5 text-primary" />
+        <div className="p-6 space-y-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+              <Play className="h-6 w-6" />
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground">Video Ready!</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Your PDF has been converted to a video explanation. You can watch it above or download it.
+            <div className="flex-1 space-y-1">
+              <h3 className="text-lg font-medium text-white">Video Ready!</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Your PDF has been successfully converted into an interactive video explanation.
               </p>
             </div>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={resetUpload} className="flex-1 bg-transparent">
+          <div className="flex gap-4">
+            <Button onClick={resetUpload} className="flex-1 bg-primary hover:bg-white text-primary-foreground rounded-lg h-11 transition-all duration-300">
               Convert Another PDF
             </Button>
           </div>
@@ -586,45 +586,45 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
         : "Our AI is analyzing your PDF and creating an engaging video tutorial."
 
     return (
-      <Card className="border-border/50 shadow-lg p-8">
+      <Card className="glass-card p-8 rounded-2xl">
         <div className="flex flex-col items-center justify-center space-y-8 py-12">
           <div className="relative">
-            <div className="h-24 w-24 rounded-full border-4 border-primary/20" />
+            <div className="h-24 w-24 rounded-full border-4 border-primary/10" />
             <div
               className="absolute inset-0 h-24 w-24 rounded-full border-4 border-primary border-t-transparent animate-spin"
-              style={{ animationDuration: "1s" }}
+              style={{ animationDuration: "1.2s" }}
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="h-10 w-10 text-primary animate-pulse" />
+              <Loader2 className="h-8 w-8 text-primary animate-pulse" />
             </div>
           </div>
 
-          <div className="text-center space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">{headline}</h3>
-            <p className="text-sm text-muted-foreground max-w-xl text-pretty">{subtext}</p>
+          <div className="text-center space-y-3">
+            <h3 className="text-xl font-medium text-white">{headline}</h3>
+            <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">{subtext}</p>
           </div>
 
-          <div className="w-full max-w-xl space-y-5">
-            <div className="rounded-lg border border-border/50 bg-card/50 p-5 space-y-3">
-              <div className="flex items-center justify-between text-sm font-medium text-foreground">
+          <div className="w-full max-w-xl space-y-6">
+            <div className="rounded-xl border border-border bg-white/[0.02] p-5 space-y-3">
+              <div className="flex items-center justify-between eyebrow text-white">
                 <span>PDF Upload</span>
-                <span>{Math.round(uploadProgress)}%</span>
+                <span className="text-primary">{Math.round(uploadProgress)}%</span>
               </div>
-              <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-primary transition-all duration-300 ease-out"
+                  className="h-full bg-primary rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
-              <p className="text-xs text-muted-foreground text-right">
+              <p className="text-xs text-muted-foreground text-right mt-1">
                 {isUploadComplete ? "Upload complete" : "Uploading file..."}
               </p>
             </div>
 
-            <div className="rounded-lg border border-border/50 bg-card/50 p-5 space-y-3">
-              <div className="flex items-center justify-between text-sm font-medium text-foreground">
+            <div className="rounded-xl border border-border bg-white/[0.02] p-5 space-y-3">
+              <div className="flex items-center justify-between eyebrow text-white">
                 <span>Video Generation</span>
-                <span>
+                <span className="text-primary">
                   {generationStage === "idle" && "Waiting"}
                   {generationStage !== "idle" && generationProgress > 0 && `${Math.round(generationProgress)}%`}
                   {generationStage !== "idle" && generationProgress === 0 && "Starting..."}
@@ -635,21 +635,21 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
               )}
               {generationStage === "queued" && (
                 <>
-                  <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full w-full bg-primary/60 animate-pulse" />
+                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full w-full bg-primary/40 animate-pulse rounded-full" />
                   </div>
-                  <p className="text-xs text-muted-foreground text-right">Queued – waiting for worker</p>
+                  <p className="text-xs text-muted-foreground text-right mt-1">Queued – waiting for worker</p>
                 </>
               )}
               {generationStage === "generating" && (
                 <>
-                  <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-primary transition-all duration-300 ease-out"
+                      className="h-full bg-primary rounded-full transition-all duration-300 ease-out"
                       style={{ width: `${generationProgress}%` }}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground text-right">{Math.round(generationProgress)}% complete</p>
+                  <p className="text-xs text-muted-foreground text-right mt-1">{Math.round(generationProgress)}% complete</p>
                 </>
               )}
             </div>
@@ -659,49 +659,63 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
     )
   }
 
+  const openFilePicker = () => document.getElementById("file-input")?.click()
+
   return (
-    <Card
-      className={`border-2 border-solid transition-colors ${
-        isDragging ? "border-blue-500 bg-[#4C4B6E]/5" : "border-[#BEBFF2]/50 bg-[#161627]"
-      } shadow-lg`}
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-    >
-      <div className="p-8 md:p-12">
-        <div className="flex flex-col items-center justify-center space-y-6 py-8">
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10">
-            <Upload className="h-10 w-10 text-primary" />
+    <div className="window-chrome rounded-[28px] p-3 pt-2">
+      {/* Title bar */}
+      <div className="flex items-center justify-between px-3 h-7">
+        <div className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-black/20" />
+          <span className="h-2 w-2 rounded-full bg-black/20" />
+        </div>
+        <span className="eyebrow text-black/25 text-[9px]">probso</span>
+      </div>
+
+      {/* Screen */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={openFilePicker}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault()
+            openFilePicker()
+          }
+        }}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        className={`group aspect-[16/10] w-full cursor-pointer rounded-[20px] border-2 border-dashed bg-black outline-none transition-colors duration-300 ${
+          isDragging ? "border-primary bg-primary/5" : "border-white/15 hover:border-white/30"
+        } focus-visible:border-primary`}
+      >
+        <div className="flex h-full flex-col items-center justify-center gap-5 px-8 text-center">
+          <div className="relative h-[70px] w-[56px] rounded-md bg-gradient-to-b from-[#2a2a30] to-[#141418] border border-white/10 transition-transform duration-300 group-hover:-translate-y-1">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-7 space-y-1.5">
+              <div className="h-px w-full bg-white/35" />
+              <div className="h-px w-3/4 bg-white/25" />
+            </div>
           </div>
 
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold text-foreground text-balance">Upload Your PDF</h2>
-            <p className="text-muted-foreground max-w-md text-pretty">
-              Drag and drop your PDF here, or click the button below to select a file from your computer
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-            <Button
-              className="flex-1 h-12 bg-[#7c7dda] hover:bg-[#6a70de] text-white gap-2 rounded-full"
-              onClick={() => document.getElementById("file-input")?.click()}
-            >
-              <FileText className="h-5 w-5" />
-              Select PDF
-            </Button>
-            <input
-              id="file-input"
-              type="file"
-              accept=".pdf"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) handleFileSelect(file)
-              }}
-            />
+          <div className="space-y-1.5">
+            <p className="text-xl font-medium text-white">Drop a PDF here</p>
+            <p className="text-sm text-muted-foreground">or click to browse · up to 100 MB</p>
           </div>
         </div>
       </div>
-    </Card>
+
+      {/* Kept outside the clickable screen so the synthetic click does not bubble back into it */}
+      <input
+        id="file-input"
+        type="file"
+        accept=".pdf"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) handleFileSelect(file)
+        }}
+      />
+    </div>
   )
 }

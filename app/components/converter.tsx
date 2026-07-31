@@ -53,18 +53,23 @@ export default function Converter() {
   }, [conversionId]);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-background relative overflow-hidden">
       {/* Sidebar */}
       <AppSidebar />
 
       {/* Main content */}
-      <main className="flex-1 lg:ml-64 bg-[#0d0d1d] via-secondary/20 to-accent/10">
-        <div className="container max-w-4xl mx-auto px-4 py-12 lg:py-16">
-          <div className="mb-12 text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold text-[#E5E5FE] text-balance">
-              Transform PDFs into Video Lessons
+      <main className="flex-1 lg:ml-64 relative z-10">
+        <div className="container max-w-4xl mx-auto px-6 py-12 lg:py-16">
+          <div className="mb-10 space-y-5">
+            <div className="eyebrow flex items-center gap-2.5 text-white/70">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse-slow" />
+              PDF → Narrated Video
+            </div>
+            <h1 className="font-display text-4xl md:text-5xl font-medium text-balance">
+              <span className="text-white">Transform PDFs into </span>
+              <span className="text-primary">video lessons.</span>
             </h1>
-            <p className="text-lg text-[#B0B3F3] max-w-2xl mx-auto text-pretty">
+            <p className="text-base text-muted-foreground max-w-2xl text-pretty leading-relaxed font-light">
               Upload any PDF textbook or document, and our AI will create an engaging video explanation to help you
               learn faster and retain more.
             </p>
