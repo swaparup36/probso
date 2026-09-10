@@ -23,9 +23,21 @@ func main() {
 	port := os.Getenv("POSTGRES_PORT")
 	sslmode := os.Getenv("POSTGRES_SSLMODE")
 	channelBinding := os.Getenv("POSTGRES_CHANNEL_BINDING")
-	dnsStr := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + port + " sslmode=" + sslmode + " channel_binding=" + channelBinding
+	dsnStr := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+		host,
+		user,
+		password,
+		dbname,
+		port,
+		sslmode,
+	)
 
-	database := db.GetDBClient(dnsStr)
+	if channelBinding != "" {
+		dsnStr += " channel_binding=" + channelBinding
+	}
+
+	database := db.GetDBClient(dsnStr)
 	fmt.Println("Connected to database successfully")
 
 	flag.Parse()

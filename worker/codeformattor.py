@@ -108,3 +108,42 @@ def fix_variable_names(code: str) -> str:
     code = re.sub(r'[^\x00-\x7F]+', '', code)
 
     return code
+
+SCENE_CLASS_RE = re.compile(
+    r"^(\s*)class\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*Scene[^)]*)\)\s*:",
+    re.MULTILINE,
+)
+
+
+def find_scene_class_names(code: str) -> list[str]:
+    """Return the names of every Manim Scene-like class declared in `code`."""
+    return [match.group(2) for match in SCENE_CLASS_RE.finditer(code)]
+
+
+def normalize_manim_block(code: str, scene_name: str) -> str:
+    """
+    Normalize a single-scene Manim block.
+
+    Keeps exactly one `from manim import *`, at the top, and renames the first
+    Scene class to `scene_name` so the renderer always knows what to target.
+    """
+    lines = code.splitlines()
+    body = []
+    renamed = False
+
+    for line in lines:
+        if line.strip() == "from manim import *":
+            continue
+
+        if not renamed:
+            match = SCENE_CLASS_RE.match(line)
+            if match:
+                line = f"{match.group(1)}class {scene_name}({match.group(3)}):"
+                renamed = True
+
+        body.append(line)
+
+    while body and not body[0].strip():
+        body.pop(0)
+
+    return "\n".join(["from manim import *", ""] + body).rstrip() + "\n"

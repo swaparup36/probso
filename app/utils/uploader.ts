@@ -3,70 +3,95 @@
 import cloudinary from "@/lib/cloudinary";
 import countPages from "page-count";
 
-export async function getPageCount(file: File) {
-  // Convert File → ArrayBuffer
-  const arrayBuffer = await file.arrayBuffer();
+const UPLOAD_FOLDER = "input_pdfs";
 
-  // Convert ArrayBuffer → Buffer
-  const buffer = Buffer.from(arrayBuffer);
+// The browser uploads straight to Cloudinary using this signature, so the PDF
+// bytes never pass through the Next server. Upload speed is then bound by the
+// user's own connection rather than by this server's outbound bandwidth.
+export async function getUploadSignature() {
+  try {
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-  // Count pages
-  const pages = await countPages(buffer, "pdf");
-  return pages;
-}
-
-
-export default async function uploadPDF(formData: FormData, pageRestriction: number) {
-    try {
-      console.log("formData: ", formData);
-      const file = formData.get('file') as File | null;
-      if(!file) return JSON.stringify({ success: false, error: 'File not provided' });
-
-      const numberOfPages = await getPageCount(file);
-      console.log("Number of pages: ", numberOfPages);
-      if(numberOfPages > pageRestriction){
-        return JSON.stringify({ success: false, error: `PDF exceeds the page limit of ${pageRestriction}. Uploaded PDF has ${numberOfPages} pages.` });
-      }
-
-      let pdfUrl = '';
-
-      console.log(file);
-
-      const fileExtension = file.name.toLowerCase().split('.')[file.name.toLowerCase().split('.').length-1];
-
-      if (fileExtension === "pdf") {
-            // Convert file to a buffer
-            const fileBuffer = await fileToBuffer(file);
-
-            // Upload the file to Cloudinary
-            const uploadResult:any = await new Promise((resolve) => {
-              cloudinary.uploader.upload_stream(
-                {
-                  folder: "input_pdfs", // Optional: Organize pdfs in a specific folder
-                  resource_type: "raw", // Specify resource type as pdf
-                  access_mode: "public",
-                  type: "upload",            // ✅ ensures /upload/
-                  use_filename: true,
-                  unique_filename: true,
-                },
-                (error, uploadResult) => {
-                  return resolve(uploadResult);
-              }).end(fileBuffer);
-            });
-
-            pdfUrl = uploadResult.secure_url;
-      }else{
-          return JSON.stringify({ success: false, error: "Only .png, .jpg, .jpeg files are allowed"});
-      }
-
-      return JSON.stringify({ success: true, message: 'File uploaded to object store', pdfUrl: pdfUrl });
-    } catch (error) {
-      console.error("Error uploading pdf:", error);
-      return JSON.stringify({ success: false, error: error });
+    if (!cloudName || !apiKey || !apiSecret) {
+      return JSON.stringify({ success: false, error: "Cloudinary is not configured" });
     }
+
+    const timestamp = Math.round(Date.now() / 1000);
+
+    // Every field posted to Cloudinary except file, api_key and resource_type
+    // has to be signed, and the signed values must match the posted ones
+    // exactly - hence the booleans are strings on both sides.
+    const signature = cloudinary.utils.api_sign_request(
+      {
+        access_mode: "public",
+        folder: UPLOAD_FOLDER,
+        timestamp,
+        unique_filename: "true",
+        use_filename: "true",
+      },
+      apiSecret
+    );
+
+    return JSON.stringify({
+      success: true,
+      cloudName,
+      apiKey,
+      timestamp,
+      signature,
+      folder: UPLOAD_FOLDER,
+    });
+  } catch (error) {
+    console.error("Error creating upload signature:", error);
+    return JSON.stringify({ success: false, error: `${error}` });
+  }
 }
 
-// Helper function to convert a File to a Buffer
-async function fileToBuffer(file: File): Promise<Buffer> {
-  return Buffer.from(await file.arrayBuffer());
+// Runs once the browser has finished uploading. Reading the PDF back from
+// Cloudinary is an inbound transfer, so the page limit stays enforced on the
+// server where the client cannot bypass it.
+export async function verifyPageLimit(
+  pdfUrl: string,
+  publicId: string,
+  pageRestriction: number
+) {
+  try {
+    const response = await fetch(pdfUrl);
+    if (!response.ok) {
+      return JSON.stringify({
+        success: false,
+        error: `Could not read the uploaded PDF (${response.status})`,
+      });
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const numberOfPages = await countPages(buffer, "pdf");
+    console.log("Number of pages: ", numberOfPages);
+
+    if (numberOfPages > pageRestriction) {
+      await removeUpload(publicId);
+      return JSON.stringify({
+        success: false,
+        error: `PDF exceeds the page limit of ${pageRestriction}. Uploaded PDF has ${numberOfPages} pages.`,
+      });
+    }
+
+    return JSON.stringify({ success: true, pages: numberOfPages });
+  } catch (error) {
+    console.error("Error verifying pdf page count:", error);
+    return JSON.stringify({ success: false, error: `${error}` });
+  }
+}
+
+// Best effort cleanup so rejected PDFs do not pile up in the bucket.
+async function removeUpload(publicId: string) {
+  try {
+    await cloudinary.uploader.destroy(publicId, {
+      resource_type: "raw",
+      type: "upload",
+    });
+  } catch (error) {
+    console.error("Failed to remove rejected upload:", publicId, error);
+  }
 }

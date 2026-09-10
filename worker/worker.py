@@ -1,44 +1,62 @@
 import shutil
 import redis
 import psycopg2
-import cloudinary
-import cloudinary.uploader
 from dotenv import load_dotenv
 import json
 import requests
 import os
 from render_pipeline import process_job
-from utils import write_status
+from utils import write_status, upload_to_cloudinary
+import cloudinary
 
 load_dotenv()
-
-# r = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), decode_responses=True)
-r = redis.Redis.from_url(
-    os.getenv("REDIS_URL"),
-    decode_responses=True
-)
-
-    
-def get_db_connection():
-    return psycopg2.connect(
-        host=os.getenv("POSTGRES_HOST"),
-        database=os.getenv("POSTGRES_DB"),
-        user=os.getenv("POSTGRES_USER"),
-        password=os.getenv("POSTGRES_PASSWORD"),
-        port=os.getenv("POSTGRES_PORT"),
-        sslmode="require",
-        keepalives=1,
-        keepalives_idle=30,
-        keepalives_interval=10,
-        keepalives_count=5,
-    )
-
 
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
     api_key=os.getenv("CLOUDINARY_API_KEY"),
     api_secret=os.getenv("CLOUDINARY_API_SECRET")
 )
+
+if os.getenv("ENV", "").upper() == "PROD":
+    r = redis.Redis(
+        host=os.environ["REDIS_HOST"],
+        port=int(os.environ.get("REDIS_PORT", "6379")),
+        decode_responses=True,
+    )
+else:
+    r = redis.Redis.from_url(
+        os.environ["REDIS_URL"],
+        decode_responses=True,
+        socket_timeout=None,
+    )
+
+    
+def get_db_connection():
+    if os.getenv("ENV", "").upper() == "PROD":
+        return psycopg2.connect(
+            host=os.getenv("POSTGRES_HOST"),
+            database=os.getenv("POSTGRES_DB"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+            port=os.getenv("POSTGRES_PORT"),
+            sslmode="require",
+            keepalives=1,
+            keepalives_idle=30,
+            keepalives_interval=10,
+            keepalives_count=5,
+        )
+    else:
+        return psycopg2.connect(
+            host=os.getenv("POSTGRES_HOST"),
+            database=os.getenv("POSTGRES_DB"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+            port=os.getenv("POSTGRES_PORT"),
+            keepalives=1,
+            keepalives_idle=30,
+            keepalives_interval=10,
+            keepalives_count=5,
+        )
 
 while True:
     task = r.brpop('task_queue', timeout=5)
@@ -51,7 +69,7 @@ while True:
         user_id = None
         
         try:
-            write_status(job_id, "processing", 0, r)
+            write_status(job_id, "processing", 0, "worker", r)
             conn = get_db_connection()
             cursor = conn.cursor()
             # Update the job status to in_progress
@@ -79,14 +97,10 @@ while True:
             # Check if file is empty
             if os.path.getsize(pdf_path) == 0:
                 raise Exception("Downloaded PDF is empty.")
-            output = process_job(job_id, r)
+            output = process_job(job_id, "worker", r)
             
             # Upload the output video to cloudinary
-            upload_result = cloudinary.uploader.upload(
-                output,
-                folder="pdfvid",
-                resource_type="auto"
-            )
+            upload_result = upload_to_cloudinary(output, job_id)
 
             print(f"Video uploaded to Cloudinary: {upload_result['secure_url']}")
             
@@ -135,7 +149,7 @@ while True:
         except Exception as e:
             print(f"Job {job_id} failed.")
             print(f"Error: {e}")
-            write_status(job_id, "failed", 0.80, r)
+            write_status(job_id, "failed", 0.80, "worker", r)
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute("UPDATE jobs SET status = %s, error_message = %s WHERE id = %s ", ('failed', f'{e}', job_id))

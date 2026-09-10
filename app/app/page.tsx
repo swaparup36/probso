@@ -20,6 +20,21 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Temporary notice: out of cloud credits */}
+      <div className="bg-primary/10 border-b border-primary/30 px-6 py-3 text-center text-sm text-white/90">
+        Heads up — I&apos;m out of cloud credits right now, so the live app won&apos;t process
+        PDFs. See the demo at{" "}
+        <a
+          href="https://youtu.be/vk4Wm5ogNRQ"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline underline-offset-4 hover:text-white"
+        >
+          youtu.be/vk4Wm5ogNRQ
+        </a>
+        . Working on accumulating funds to bring it back.
+      </div>
+
       {/* Header */}
       <Header />
 

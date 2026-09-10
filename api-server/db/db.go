@@ -9,12 +9,12 @@ import (
 
 var Database *gorm.DB
 
-func GetDBClient(dnsStr string) *gorm.DB {
+func GetDBClient(dsnStr string) *gorm.DB {
 	if Database != nil {
 		return Database
 	}
 
-	db, err := gorm.Open(postgres.Open(dnsStr), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsnStr), &gorm.Config{})
 
 	if err != nil {
 		panic(fmt.Sprintf("Error connecting to database: %v", err))

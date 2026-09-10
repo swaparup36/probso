@@ -6,7 +6,8 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Loader2, Play } from "lucide-react"
-import uploadPDF from "@/utils/uploader"
+import { uploadPdfToCloudinary } from "@/utils/directUpload"
+import { verifyPageLimit } from "@/utils/uploader"
 import { useAuth, useUser } from "@clerk/nextjs"
 import axios from "axios"
 import { useRouter } from "next/navigation"
@@ -83,20 +84,6 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
         ws.send(JSON.stringify({ type: "ping" }))
       }
     }, 30000)
-  }
-
-  const startUploadProgressSimulation = () => {
-    clearUploadProgressInterval()
-    setUploadProgress(0)
-    uploadProgressIntervalRef.current = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 95) {
-          return prev
-        }
-        const next = Math.min(prev + Math.round(Math.random() * 12 + 8), 95)
-        return next
-      })
-    }, 300)
   }
 
   const completeUploadProgressSimulation = () => {
@@ -393,10 +380,8 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
       websocketRef.current.close()
       websocketRef.current = null
     }
-    startUploadProgressSimulation()
-
-    const formData = new FormData()
-    formData.append("file", file)
+    clearUploadProgressInterval()
+    setUploadProgress(0)
 
     try {
       const subscriptionData = await getUserSubscriptionData();
@@ -424,25 +409,28 @@ export function PDFUploadSection({ setOutputVidUrl, outputVidUrl }: PDFUploadSec
         } 
       }
 
-      const uploadPDFResponse = await uploadPDF(formData, pageLimit)
-      console.log("Upload pdf response: ", uploadPDFResponse)
-      const uploadPDFResponseObj = JSON.parse(uploadPDFResponse)
+      const { secureUrl, publicId } = await uploadPdfToCloudinary(file, (percent) => {
+        // Hold back the last few percent for the page-limit check below.
+        setUploadProgress(Math.min(percent, 95))
+      })
+      console.log("Uploaded PDF URL: ", secureUrl)
 
-      if (!uploadPDFResponseObj.success) {
+      const verifyResponse = JSON.parse(await verifyPageLimit(secureUrl, publicId, pageLimit))
+      console.log("Page limit check: ", verifyResponse)
+
+      if (!verifyResponse.success) {
         toast({
           variant: "destructive",
           title: "Upload Error",
-          description: `Error uploading PDF: ${uploadPDFResponseObj.error}`
+          description: `Error uploading PDF: ${verifyResponse.error}`
         })
         resetUpload()
         return
       }
 
       completeUploadProgressSimulation()
-      const uploadedPdfUrl = uploadPDFResponseObj.pdfUrl
-      setPdfUrl(uploadedPdfUrl)
-      requestVideoGeneration(uploadedPdfUrl, file)
-      console.log("Uploaded PDF URL: ", uploadedPdfUrl)
+      setPdfUrl(secureUrl)
+      requestVideoGeneration(secureUrl, file)
     } catch (error) {
       console.error("Error uploading PDF:", error)
       toast({

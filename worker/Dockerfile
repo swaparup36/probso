@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /worker
 
-# --- system deps required by manim / pycairo ---
+# system deps required by manim / pycairo
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
@@ -27,11 +27,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# ---- CRITICAL FIX for meson clock skew ----
+# CRITICAL FIX for meson clock skew 
 ENV SOURCE_DATE_EPOCH=0
 ENV MESON_SKIP_CLOCK_CHECK=1
 
-# ---- Install Piper TTS ----
+# Install Piper TTS
 RUN pip install piper-tts
 
 COPY requirements.txt .

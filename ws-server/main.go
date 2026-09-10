@@ -71,14 +71,14 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 					global.SubsMu.Lock()
 					delete(global.Subscribers, jobId)
 					global.SubsMu.Unlock()
-					log.Printf("🗑️  Subscriber removed for jobId: %s", jobId)
+					log.Printf("Subscriber removed for jobId: %s", jobId)
 				}()
 
 				for msg := range s.Send {
-					log.Printf("📨 Sending message to jobId %s: %s", jobId, string(msg))
+					log.Printf("Sending message to jobId %s: %s", jobId, string(msg))
 					err := s.Conn.WriteMessage(websocket.TextMessage, msg)
 					if err != nil {
-						log.Printf("❌ Error sending message to jobId %s: %v", jobId, err)
+						log.Printf("Error sending message to jobId %s: %v", jobId, err)
 						return
 					}
 				}
@@ -148,11 +148,11 @@ func listenToJobStatus(redisClient *redis.Client) {
 		}
 		err := json.Unmarshal([]byte(msg.Payload), &statusUpdateMsg)
 		if err != nil {
-			log.Printf("❌ Error unmarshalling job status update: %v", err)
+			log.Printf("Error unmarshalling job status update: %v", err)
 			continue
 		}
 
-		log.Printf("🎯 Attempting to publish to jobId: %s", statusUpdateMsg.JobId)
+		log.Printf("Attempting to publish to jobId: %s", statusUpdateMsg.JobId)
 		// Publish the message to the corresponding subscriber
 		Publish(statusUpdateMsg.JobId, []byte(msg.Payload))
 	}
@@ -168,7 +168,7 @@ func listenToJobOutput(redisClient *redis.Client) {
 		log.Printf("Received job output update payload: %s", msg.Payload)
 
 		if !json.Valid([]byte(msg.Payload)) {
-			log.Println("❌ Invalid JSON received")
+			log.Println("Invalid JSON received")
 			continue
 		}
 
