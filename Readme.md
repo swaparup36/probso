@@ -30,14 +30,7 @@ That's Probso.
 
 ## Demo
 
-<iframe
-  width="560"
-  height="315"
-  src="https://www.youtube.com/embed/vk4Wm5ogNRQ"
-  title="Demo Video"
-  frameborder="0"
-  allowfullscreen>
-</iframe>
+https://github.com/user-attachments/assets/fdc3f573-3752-47a0-b536-49c7acf98cb2
 
 ---
 
