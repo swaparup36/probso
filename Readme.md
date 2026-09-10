@@ -30,7 +30,7 @@ That's Probso.
 
 ## Demo
 
-https://github.com/user-attachments/assets/fdc3f573-3752-47a0-b536-49c7acf98cb2
+https://github.com/user-attachments/assets/931b4076-37b2-4de7-87c4-6c0eb581c944
 
 ---
 
