@@ -30,7 +30,14 @@ That's Probso.
 
 ## Demo
 
-[![Demo Video](https://img.youtube.com/vi/vk4Wm5ogNRQ/maxresdefault.jpg)](https://youtu.be/vk4Wm5ogNRQ)
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/vk4Wm5ogNRQ"
+  title="Demo Video"
+  frameborder="0"
+  allowfullscreen>
+</iframe>
 
 ---
 
